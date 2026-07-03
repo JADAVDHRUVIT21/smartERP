@@ -47,9 +47,10 @@ export default function Stock() {
       setLoading(true);
 
       const res = await API.get("/stock/");
+        const res = await API.get("/stock/");
 
-console.log("Response:", res.data);
-console.log("Is Array:", Array.isArray(res.data));
+        console.log("Response:", res.data);
+    console.log("Is Array:", Array.isArray(res.data));
       console.log(res.data);
 
       let data = [];
@@ -73,22 +74,20 @@ console.log("Is Array:", Array.isArray(res.data));
     }
   };
 
-const handleSearch = () => {
-  console.log("Search Text:", search);
-  console.log("Stocks:", stocks);
+  const handleSearch = () => {
+    if (search.trim() === "") {
+      setFilteredStocks(stocks);
+      return;
+    }
 
-  const result = stocks.filter((item) => {
-    console.log(item.product_name);
+    const result = stocks.filter((item) =>
+      item.product_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
 
-    return item.product_name
-      .toLowerCase()
-      .includes(search.trim().toLowerCase());
-  });
-
-  console.log("Result:", result);
-
-  setFilteredStocks(result);
-};
+    setFilteredStocks(result);
+  };
 
   const handleRefresh = () => {
     setSearch("");
