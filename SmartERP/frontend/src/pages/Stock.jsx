@@ -47,10 +47,9 @@ export default function Stock() {
       setLoading(true);
 
       const res = await API.get("/stock/");
-        const res = await API.get("/stock/");
 
-        console.log("Response:", res.data);
-        console.log("Is Array:", Array.isArray(res.data));
+console.log("Response:", res.data);
+console.log("Is Array:", Array.isArray(res.data));
       console.log(res.data);
 
       let data = [];
