@@ -49,25 +49,19 @@ export default function Stock() {
   }, []);
 
   // Fetch all stocks
-  const loadStock = async () => {
-    try {
-      const res = await API.get("/stock/");
-      let data = [];
+const loadStock = async () => {
+  try {
+    const res = await API.get("/stock/");
 
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (Array.isArray(res.data.data)) {
-        data = res.data.data;
-      } else if (Array.isArray(res.data.stocks)) {
-        data = res.data.stocks;
-      }
+    console.log("API Response =", res.data);
+    console.log("Type =", typeof res.data);
+    console.log("Is Array =", Array.isArray(res.data));
 
-      setStocks(data);
-    } catch (err) {
-      console.error(err);
-      setStocks([]);
-    }
-  };
+    setStocks(res.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // Backend search implementation 
   const searchStock = async (passedSearchVal) => {
