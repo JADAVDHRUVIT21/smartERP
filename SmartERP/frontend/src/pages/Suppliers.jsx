@@ -3,7 +3,7 @@ import axios from "axios";
 import Layout from "../components/Layout";
 
 
-const API="https://smarterp-1-6rfs.onrender.com/suppliers/';
+const API='https://smarterp-1-6rfs.onrender.com/suppliers/';
 
 
 
