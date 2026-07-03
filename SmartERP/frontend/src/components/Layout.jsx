@@ -1,7 +1,15 @@
+import { useState } from "react";
 import Sidebar from "./Sidebar";
+import { useNavigate } from "react-router-dom";
 
 export default function Layout({ title, children }) {
   const today = new Date().toLocaleDateString();
+  
+  const navigate = useNavigate();
+  
+  const handleRefresh = () => {
+    navigate("/login");
+  };
 
   return (
     <div
@@ -42,6 +50,12 @@ export default function Layout({ title, children }) {
 
           <div style={{ textAlign: "right" }}>
             <b>Admin</b>
+            <button
+              onClick={() => {
+                localStorage.clear()
+                handleRefresh() 
+              }}
+            >Logout</button>
             <br />
             <small>{today}</small>
           </div>
