@@ -47,10 +47,10 @@ export default function Stock() {
       setLoading(true);
 
       const res = await API.get("/stock/");
+      console.log("API base url:", import.meta.env.VITE_API_URL);
 
-      console.log("Response:", res.data);
+      console.log("Response:", res);
       console.log("Is Array:", Array.isArray(res.data));
-      console.log(res.data);
 
       let data = [];
 
@@ -74,6 +74,7 @@ export default function Stock() {
   };
 
   const handleSearch = () => {
+
     if (search.trim() === "") {
       setFilteredStocks(stocks);
       return;
@@ -84,7 +85,8 @@ export default function Stock() {
         ?.toLowerCase()
         .includes(search.toLowerCase())
     );
-
+    console.log("Search Result:", result);
+    console.log("stocks:", stocks);
     setFilteredStocks(result);
   };
 
