@@ -4,17 +4,12 @@ import API from "../api/axios";
 
 export default function Stock() {
   const [stocks, setStocks] = useState([]);
+  const [filteredStocks, setFilteredStocks] = useState([]);
   const [search, setSearch] = useState("");
-  const searchRef = useRef(null);
-  
-  // Use a ref to keep track of the latest search value inside the keydown event listener
-  const searchStateRef = useRef(search);
-  
-  useEffect(() => {
-    searchStateRef.current = search;
-  }, [search]);
+  const [loading, setLoading] = useState(false);
 
-  // Initial data load
+  const searchRef = useRef(null);
+
   useEffect(() => {
     loadStock();
 
@@ -31,13 +26,12 @@ export default function Stock() {
 
       if (e.key === "F3") {
         e.preventDefault();
-        searchStock(searchStateRef.current);
+        handleSearch();
       }
 
       if (e.key === "F4") {
         e.preventDefault();
-        setSearch("");
-        loadStock();
+        handleRefresh();
       }
     };
 
@@ -48,25 +42,14 @@ export default function Stock() {
     };
   }, []);
 
-  // Fetch all stocks
-const loadStock = async () => {
-  try {
-    const res = await API.get("/stock/");
-
-    console.log("API Response =", res.data);
-    console.log("Type =", typeof res.data);
-    console.log("Is Array =", Array.isArray(res.data));
-
-    setStocks(res.data);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-  // Backend search implementation 
-  const searchStock = async (passedSearchVal) => {
+  const loadStock = async () => {
     try {
+      setLoading(true);
+
       const res = await API.get("/stock/");
+
+      console.log(res.data);
+
       let data = [];
 
       if (Array.isArray(res.data)) {
@@ -77,20 +60,35 @@ const loadStock = async () => {
         data = res.data.stocks;
       }
 
-      // Fallback to state if function wasn't called from the event listener ref
-      const currentSearch = typeof passedSearchVal === "string" ? passedSearchVal : search;
-
-      const filtered = data.filter((item) =>
-        (item.product_name || "")
-          .toLowerCase()
-          .includes(currentSearch.toLowerCase())
-      );
-
-      setStocks(filtered);
+      setStocks(data);
+      setFilteredStocks(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       setStocks([]);
+      setFilteredStocks([]);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleSearch = () => {
+    if (search.trim() === "") {
+      setFilteredStocks(stocks);
+      return;
+    }
+
+    const result = stocks.filter((item) =>
+      item.product_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
+
+    setFilteredStocks(result);
+  };
+
+  const handleRefresh = () => {
+    setSearch("");
+    loadStock();
   };
 
   return (
@@ -100,10 +98,10 @@ const loadStock = async () => {
           <h1>Stock Master</h1>
 
           <div style={shortcutBar}>
-            <span>F1 Refresh Stock</span>
-            <span>F2 Search Focus</span>
-            <span>F3 API Filter</span>
-            <span>F4 Reset All</span>
+            <span>F1 Refresh</span>
+            <span>F2 Focus Search</span>
+            <span>F3 Search</span>
+            <span>F4 Reset</span>
           </div>
 
           <div style={header}>
@@ -117,21 +115,27 @@ const loadStock = async () => {
             />
 
             <div style={buttonGroup}>
-              <button onClick={() => searchStock(search)} style={searchBtn}>
+              <button
+                onClick={handleSearch}
+                style={searchBtn}
+              >
                 Search
               </button>
 
               <button
-                onClick={() => {
-                  setSearch("");
-                  loadStock();
-                }}
+                onClick={handleRefresh}
                 style={refreshBtn}
               >
                 Refresh
               </button>
             </div>
           </div>
+
+          {loading && (
+            <p style={{ textAlign: "center" }}>
+              Loading...
+            </p>
+          )}
 
           <table style={table}>
             <thead>
@@ -146,19 +150,29 @@ const loadStock = async () => {
             </thead>
 
             <tbody>
-              {stocks.length === 0 ? (
+              {filteredStocks.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={td}>
-                    No Stock Available
+                  <td
+                    colSpan={6}
+                    style={td}
+                  >
+                    No Stock Found
                   </td>
                 </tr>
               ) : (
-                stocks.map((item) => (
-                  <tr key={item.id} style={row}>
+                filteredStocks.map((item) => (
+                  <tr
+                    key={item.id}
+                    style={row}
+                  >
                     <td style={td}>{item.id}</td>
+
                     <td style={td}>{item.product_name}</td>
+
                     <td style={td}>{item.purchase_qty}</td>
+
                     <td style={td}>{item.sale_qty}</td>
+
                     <td
                       style={{
                         ...td,
@@ -173,13 +187,20 @@ const loadStock = async () => {
                     >
                       {item.available_qty}
                     </td>
+
                     <td style={td}>
                       {item.available_qty > 10 ? (
-                        <span style={green}>In Stock</span>
+                        <span style={green}>
+                          In Stock
+                        </span>
                       ) : item.available_qty > 0 ? (
-                        <span style={orange}>Low Stock</span>
+                        <span style={orange}>
+                          Low Stock
+                        </span>
                       ) : (
-                        <span style={red}>Out of Stock</span>
+                        <span style={red}>
+                          Out of Stock
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -193,7 +214,6 @@ const loadStock = async () => {
   );
 }
 
-// Inline Styles Object
 const page = {
   background: "#f8fafc",
   padding: 30,
@@ -221,6 +241,7 @@ const shortcutBar = {
 const header = {
   display: "flex",
   justifyContent: "space-between",
+  alignItems: "center",
   marginTop: 25,
   marginBottom: 20,
   gap: 10,
@@ -229,35 +250,32 @@ const header = {
 
 const searchBox = {
   padding: 12,
-  width: 300,
+  width: 320,
   borderRadius: 8,
-  border: "1px solid #ccc",
+  border: "1px solid #d1d5db",
 };
 
 const buttonGroup = {
   display: "flex",
   gap: 10,
-  flexWrap: "wrap",
 };
 
 const searchBtn = {
   background: "#16a34a",
   color: "#fff",
   border: "none",
-  padding: "12px 20px",
+  padding: "12px 22px",
   borderRadius: 8,
   cursor: "pointer",
-  fontWeight: "bold",
 };
 
 const refreshBtn = {
   background: "#2563eb",
   color: "#fff",
   border: "none",
-  padding: "12px 20px",
+  padding: "12px 22px",
   borderRadius: 8,
   cursor: "pointer",
-  fontWeight: "bold",
 };
 
 const table = {
@@ -274,7 +292,7 @@ const th = {
 const td = {
   padding: 12,
   textAlign: "center",
-  borderBottom: "1px solid #ddd",
+  borderBottom: "1px solid #e5e7eb",
 };
 
 const row = {
@@ -284,20 +302,20 @@ const row = {
 const green = {
   background: "#16a34a",
   color: "#fff",
-  padding: "5px 10px",
+  padding: "5px 12px",
   borderRadius: 20,
 };
 
 const orange = {
   background: "#f59e0b",
   color: "#fff",
-  padding: "5px 10px",
+  padding: "5px 12px",
   borderRadius: 20,
 };
 
 const red = {
   background: "#dc2626",
   color: "#fff",
-  padding: "5px 10px",
+  padding: "5px 12px",
   borderRadius: 20,
 };
