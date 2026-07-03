@@ -74,20 +74,22 @@ export default function Stock() {
     }
   };
 
-  const handleSearch = () => {
-    if (search.trim() === "") {
-      setFilteredStocks(stocks);
-      return;
-    }
+const handleSearch = () => {
+  console.log("Search Text:", search);
+  console.log("Stocks:", stocks);
 
-    const result = stocks.filter((item) =>
-      item.product_name
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
-    );
+  const result = stocks.filter((item) => {
+    console.log(item.product_name);
 
-    setFilteredStocks(result);
-  };
+    return item.product_name
+      .toLowerCase()
+      .includes(search.trim().toLowerCase());
+  });
+
+  console.log("Result:", result);
+
+  setFilteredStocks(result);
+};
 
   const handleRefresh = () => {
     setSearch("");
