@@ -14,7 +14,7 @@ export default function Ledger() {
       const token = localStorage.getItem("token");
 
       const res = await axios.get(
-        "http://127.0.0.1:8000/ledger/",
+        "https://smarterp-1-6rfs.onrender.com/ledger/",
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 
-const API = "http://127.0.0.1:8000/purchases/";
+const API = "https://smarterp-1-6rfs.onrender.com/purchases/";
 
 export default function Purchases() {
   const initialForm = {

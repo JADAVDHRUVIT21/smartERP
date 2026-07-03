@@ -19,7 +19,7 @@ export default function Reports() {
 
   const loadReport = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/reports/");
+      const res = await axios.get("https://smarterp-1-6rfs.onrender.com/reports/");
       setReport(res.data);
     } catch (err) {
       console.log(err);

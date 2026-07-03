@@ -22,7 +22,7 @@
         const token = localStorage.getItem("token");
 
         const res = await axios.get(
-          "http://127.0.0.1:8000/dashboard/finance",
+          "https://smarterp-1-6rfs.onrender.com/dashboard/finance",
           {
             headers: {
               Authorization: `Bearer ${token}`,

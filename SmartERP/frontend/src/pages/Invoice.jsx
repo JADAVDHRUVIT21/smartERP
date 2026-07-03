@@ -3,7 +3,7 @@ import axios from "axios";
 import Layout from "../components/Layout";
 
 export default function Invoice() {
-  const API = "http://127.0.0.1:8000/invoices/";
+  const API = "https://smarterp-1-6rfs.onrender.com/invoices/";
 
   const initialForm = {
     invoiceNo: "",
