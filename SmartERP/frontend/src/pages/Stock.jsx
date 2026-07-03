@@ -6,7 +6,15 @@ export default function Stock() {
   const [stocks, setStocks] = useState([]);
   const [search, setSearch] = useState("");
   const searchRef = useRef(null);
+  
+  // Use a ref to keep track of the latest search value inside the keydown event listener
+  const searchStateRef = useRef(search);
+  
+  useEffect(() => {
+    searchStateRef.current = search;
+  }, [search]);
 
+  // Initial data load
   useEffect(() => {
     loadStock();
 
@@ -23,7 +31,13 @@ export default function Stock() {
 
       if (e.key === "F3") {
         e.preventDefault();
+        searchStock(searchStateRef.current);
+      }
+
+      if (e.key === "F4") {
+        e.preventDefault();
         setSearch("");
+        loadStock();
       }
     };
 
@@ -34,10 +48,10 @@ export default function Stock() {
     };
   }, []);
 
+  // Fetch all stocks
   const loadStock = async () => {
     try {
       const res = await API.get("/stock/");
-
       let data = [];
 
       if (Array.isArray(res.data)) {
@@ -50,16 +64,40 @@ export default function Stock() {
 
       setStocks(data);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setStocks([]);
     }
   };
 
-  const filteredStocks = stocks.filter((item) =>
-    (item.product_name || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  // Backend search implementation 
+  const searchStock = async (passedSearchVal) => {
+    try {
+      const res = await API.get("/stock/");
+      let data = [];
+
+      if (Array.isArray(res.data)) {
+        data = res.data;
+      } else if (Array.isArray(res.data.data)) {
+        data = res.data.data;
+      } else if (Array.isArray(res.data.stocks)) {
+        data = res.data.stocks;
+      }
+
+      // Fallback to state if function wasn't called from the event listener ref
+      const currentSearch = typeof passedSearchVal === "string" ? passedSearchVal : search;
+
+      const filtered = data.filter((item) =>
+        (item.product_name || "")
+          .toLowerCase()
+          .includes(currentSearch.toLowerCase())
+      );
+
+      setStocks(filtered);
+    } catch (err) {
+      console.error(err);
+      setStocks([]);
+    }
+  };
 
   return (
     <Layout title="Stock">
@@ -69,8 +107,9 @@ export default function Stock() {
 
           <div style={shortcutBar}>
             <span>F1 Refresh Stock</span>
-            <span>F2 Search</span>
-            <span>F3 Clear Search</span>
+            <span>F2 Search Focus</span>
+            <span>F3 API Filter</span>
+            <span>F4 Reset All</span>
           </div>
 
           <div style={header}>
@@ -83,12 +122,21 @@ export default function Stock() {
               style={searchBox}
             />
 
-            <button
-              onClick={loadStock}
-              style={refreshBtn}
-            >
-              Refresh Stock
-            </button>
+            <div style={buttonGroup}>
+              <button onClick={() => searchStock(search)} style={searchBtn}>
+                Search
+              </button>
+
+              <button
+                onClick={() => {
+                  setSearch("");
+                  loadStock();
+                }}
+                style={refreshBtn}
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           <table style={table}>
@@ -104,29 +152,19 @@ export default function Stock() {
             </thead>
 
             <tbody>
-              {filteredStocks.length === 0 ? (
+              {stocks.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    style={td}
-                  >
+                  <td colSpan={6} style={td}>
                     No Stock Available
                   </td>
                 </tr>
               ) : (
-                filteredStocks.map((item) => (
-                  <tr
-                    key={item.id}
-                    style={row}
-                  >
+                stocks.map((item) => (
+                  <tr key={item.id} style={row}>
                     <td style={td}>{item.id}</td>
-
                     <td style={td}>{item.product_name}</td>
-
                     <td style={td}>{item.purchase_qty}</td>
-
                     <td style={td}>{item.sale_qty}</td>
-
                     <td
                       style={{
                         ...td,
@@ -141,7 +179,6 @@ export default function Stock() {
                     >
                       {item.available_qty}
                     </td>
-
                     <td style={td}>
                       {item.available_qty > 10 ? (
                         <span style={green}>In Stock</span>
@@ -162,6 +199,7 @@ export default function Stock() {
   );
 }
 
+// Inline Styles Object
 const page = {
   background: "#f8fafc",
   padding: 30,
@@ -202,13 +240,30 @@ const searchBox = {
   border: "1px solid #ccc",
 };
 
-const refreshBtn = {
-  background: "#2563eb",
+const buttonGroup = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const searchBtn = {
+  background: "#16a34a",
   color: "#fff",
-  border: 0,
+  border: "none",
   padding: "12px 20px",
   borderRadius: 8,
   cursor: "pointer",
+  fontWeight: "bold",
+};
+
+const refreshBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "12px 20px",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: "bold",
 };
 
 const table = {
