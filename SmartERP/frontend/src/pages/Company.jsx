@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 
-const API = "https://smarterp-1-6rfs.onrender.com/api/company/";
+const API = "https://smarterp-1-6rfs.onrender.com/companies/";
 
 export default function Company() {
   const initialState = {
