@@ -117,6 +117,14 @@ export default function Invoice() {
     setForm(initialForm);
     setEditingId(null);
     setSelectedId(null);
+    toast.success("Form cleared successfully!", {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#22c55e",
+        color: "#fff"
+      }
+    });
   };
 
   const saveInvoice = async () => {
@@ -220,51 +228,62 @@ export default function Invoice() {
   };
 
   const deleteInvoice = async (id) => {
-    // Custom confirm toast with pulsing animation icon
+    // Professional Delete Confirmation Toast
     toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? 'animate-enter' : 'animate-leave'
-        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-      >
-        <div className="flex-1 w-0 p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0 pt-0.5">
-              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center animate-pulse">
-                <span className="text-xl">⚠️</span>
-              </div>
-            </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-gray-900">
-                Delete Invoice?
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Are you sure you want to delete this invoice? This action cannot be undone.
-              </p>
+      <div style={deleteOverlay}>
+        <div style={deleteContainer}>
+          {/* Warning Icon */}
+          <div style={deleteIconWrapper}>
+            <div style={deleteIconCircle}>
+              <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
             </div>
           </div>
-        </div>
-        <div className="flex border-l border-gray-200">
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-              confirmDelete(id);
-            }}
-            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-          >
-            Delete
-          </button>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="w-full border border-transparent rounded-none p-4 flex items-center justify-center text-sm font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200"
-          >
-            Cancel
-          </button>
+
+          {/* Content */}
+          <div style={deleteContent}>
+            <h3 style={deleteTitle}>Delete Invoice</h3>
+            <p style={deleteMessage}>
+              Are you sure you want to delete this invoice? This action cannot be undone.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div style={deleteActions}>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                confirmDelete(id);
+              }}
+              style={deleteButton}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#dc2626";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "#ef4444";
+              }}
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              style={cancelButton}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#f3f4f6";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "transparent";
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     ), {
-      duration: 5000,
-      position: "top-right"
+      duration: Infinity,
+      position: "top-center",
     });
   };
 
@@ -450,24 +469,24 @@ export default function Invoice() {
 
       {/* Animation styles for custom toast */}
       <style>{`
-        @keyframes enter {
+        @keyframes fadeIn {
           from {
             opacity: 0;
-            transform: scale(0.9) translateY(10px);
+            transform: scale(0.95) translateY(-10px);
           }
           to {
             opacity: 1;
             transform: scale(1) translateY(0);
           }
         }
-        @keyframes leave {
+        @keyframes fadeOut {
           from {
             opacity: 1;
             transform: scale(1) translateY(0);
           }
           to {
             opacity: 0;
-            transform: scale(0.9) translateY(10px);
+            transform: scale(0.95) translateY(-10px);
           }
         }
         @keyframes pulse {
@@ -475,25 +494,118 @@ export default function Invoice() {
             transform: scale(1);
           }
           50% {
-            transform: scale(1.1);
+            transform: scale(1.05);
           }
           100% {
             transform: scale(1);
           }
         }
         .animate-enter {
-          animation: enter 0.3s ease-out;
+          animation: fadeIn 0.25s ease-out;
         }
         .animate-leave {
-          animation: leave 0.2s ease-in;
+          animation: fadeOut 0.2s ease-in;
         }
         .animate-pulse {
-          animation: pulse 0.8s ease-in-out infinite;
+          animation: pulse 1s ease-in-out infinite;
         }
       `}</style>
     </Layout>
   );
 }
+
+// Delete Toast Styles
+const deleteOverlay = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "100vh",
+  padding: "20px",
+};
+
+const deleteContainer = {
+  background: "white",
+  borderRadius: "16px",
+  padding: "32px",
+  width: "440px",
+  maxWidth: "95vw",
+  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
+  textAlign: "center",
+  animation: "fadeIn 0.25s ease-out",
+};
+
+const deleteIconWrapper = {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "20px",
+};
+
+const deleteIconCircle = {
+  width: "64px",
+  height: "64px",
+  borderRadius: "50%",
+  background: "#fef2f2",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  animation: "pulse 1s ease-in-out infinite",
+};
+
+const deleteIconSvg = {
+  width: "36px",
+  height: "36px",
+  color: "#ef4444",
+};
+
+const deleteContent = {
+  marginBottom: "28px",
+};
+
+const deleteTitle = {
+  fontSize: "20px",
+  fontWeight: "600",
+  color: "#111827",
+  margin: "0 0 8px 0",
+};
+
+const deleteMessage = {
+  fontSize: "14px",
+  color: "#6b7280",
+  margin: "0",
+  lineHeight: "1.6",
+};
+
+const deleteActions = {
+  display: "flex",
+  gap: "12px",
+  justifyContent: "center",
+};
+
+const deleteButton = {
+  background: "#ef4444",
+  color: "white",
+  border: "none",
+  padding: "10px 36px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  transition: "background 0.2s",
+  minWidth: "120px",
+};
+
+const cancelButton = {
+  background: "transparent",
+  color: "#374151",
+  border: "1px solid #d1d5db",
+  padding: "10px 36px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  minWidth: "120px",
+};
 
 // --- Dynamic Matching UI Styles ---
 const page = {
