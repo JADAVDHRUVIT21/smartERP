@@ -1,9 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://smarterp-1-6rfs.onrender.com",
 });
 
-console.log("API base url:", import.meta.env.VITE_API_URL);
-console.log(import.meta.env.VITE_API_URL)
 export default API;
