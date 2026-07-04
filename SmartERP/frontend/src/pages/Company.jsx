@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
+import toast, { Toaster } from "react-hot-toast";
 
 const API = "https://smarterp-1-6rfs.onrender.com/companies/";
 
@@ -46,10 +47,18 @@ export default function Company() {
 
       if (e.key === "F4") {
         e.preventDefault();
-        // Since event listeners capture the initial state scope, we read selectedId safely
         setSelectedId((currentId) => {
           if (currentId) {
             deleteCompany(currentId);
+          } else {
+            toast.error("Please select a company first", {
+              position: "top-right",
+              duration: 3000,
+              style: {
+                background: "#ef4444",
+                color: "#fff"
+              }
+            });
           }
           return currentId;
         });
@@ -60,16 +69,31 @@ export default function Company() {
     return () => {
       window.removeEventListener("keydown", shortcut);
     };
-  }, [company, editingId]); // Dependencies updated to ensure functions access fresh state data
+  }, [company, editingId]);
 
   const loadCompanies = async () => {
     try {
       setLoading(true);
       const res = await axios.get(API);
       setCompanies(res.data);
+      toast.success("Companies loaded successfully!", {
+        position: "top-right",
+        duration: 2000,
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
     } catch (err) {
       console.log(err);
-      alert("Unable to load companies.");
+      toast.error("Unable to load companies", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -77,7 +101,14 @@ export default function Company() {
 
   const saveCompany = async () => {
     if (!company.company_name || !company.owner_name) {
-      alert("Fill required fields");
+      toast.error("Company Name and Owner Name are required", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       return;
     }
 
@@ -85,16 +116,37 @@ export default function Company() {
       setLoading(true);
       if (editingId) {
         await axios.put(`${API}${editingId}`, company);
-        alert("Company Updated");
+        toast.success("Company Updated Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       } else {
         await axios.post(API, company);
-        alert("Company Added");
+        toast.success("Company Added Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       }
       clearForm();
       loadCompanies();
     } catch (err) {
       console.log(err);
-      alert(err.response?.data?.detail || "Unable to save company.");
+      toast.error(err.response?.data?.detail || "Unable to save company", {
+        position: "top-right",
+        duration: 4000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -104,23 +156,117 @@ export default function Company() {
     setCompany(initialState);
     setEditingId(null);
     setSelectedId(null);
+    toast.success("Form cleared successfully!", {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#22c55e",
+        color: "#fff"
+      }
+    });
   };
 
   const editCompany = (item) => {
     setEditingId(item.id);
     setSelectedId(item.id);
     setCompany(item);
+    toast.info("Editing company: " + item.company_name, {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#3b82f6",
+        color: "#fff"
+      }
+    });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   };
 
   const deleteCompany = async (id) => {
-    if (!window.confirm("Delete Company?")) return;
+    toast.custom((t) => (
+      <div style={deleteContainer}>
+        {/* Warning Icon */}
+        <div style={deleteIconWrapper}>
+          <div style={deleteIconCircle}>
+            <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={deleteContent}>
+          <h3 style={deleteTitle}>Delete Company</h3>
+          <p style={deleteMessage}>
+            Are you sure you want to delete this company? This action cannot be undone.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div style={deleteActions}>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              confirmDelete(id);
+            }}
+            style={deleteButton}
+            onMouseEnter={(e) => {
+              e.target.style.background = "#dc2626";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "#ef4444";
+            }}
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            style={cancelButton}
+            onMouseEnter={(e) => {
+              e.target.style.background = "#f3f4f6";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "transparent";
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      position: "top-center",
+    });
+  };
+
+  const confirmDelete = async (id) => {
     try {
+      setLoading(true);
       await axios.delete(`${API}${id}`);
       loadCompanies();
       clearForm();
+      toast.success("Company Deleted Successfully!", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
     } catch (err) {
       console.log(err);
-      alert("Error deleting company");
+      toast.error("Error deleting company", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,6 +279,38 @@ export default function Company() {
 
   return (
     <Layout title="Company Profile">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "14px"
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#22c55e",
+              color: "#fff"
+            }
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          },
+          info: {
+            duration: 2000,
+            style: {
+              background: "#3b82f6",
+              color: "#fff"
+            }
+          }
+        }}
+      />
+
       <div style={card}>
         <h1>Company Information</h1>
 
@@ -201,7 +379,7 @@ export default function Company() {
             {loading ? "Saving..." : editingId ? "Update Company" : "Save Company"}
           </button>
 
-          <button style={reloadBtn} onClick={loadCompanies}>
+          <button style={reloadBtn} onClick={loadCompanies} disabled={loading}>
             Reload List
           </button>
 
@@ -222,14 +400,16 @@ export default function Company() {
           style={{ ...input, width: "100%", boxSizing: "border-box", marginBottom: 20 }}
         />
 
+        {loading && <p style={{ color: "#3b82f6", textAlign: "center" }}>Loading...</p>}
+
         <table style={table}>
           <thead>
             <tr>
-              <th style={th}>ID</th>
+              <th style={{ ...th, borderRadius: "8px 0 0 8px" }}>ID</th>
               <th style={th}>Company</th>
               <th style={th}>Owner</th>
               <th style={th}>Phone</th>
-              <th style={th}>Action</th>
+              <th style={{ ...th, borderRadius: "0 8px 8px 0" }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -245,29 +425,31 @@ export default function Company() {
                     onClick={() => setSelectedId(item.id)}
                     style={{
                       ...tableRow,
-                      background: isSelected ? "#f1f5f9" : "transparent",
+                      background: isSelected ? "#dbeafe" : "transparent",
                       fontWeight: isSelected ? "500" : "normal"
                     }}
                   >
                     <td style={td}>{item.id}</td>
-                    <td style={td}>{item.company_name}</td>
+                    <td style={{ ...td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
+                      {item.company_name}
+                    </td>
                     <td style={td}>{item.owner_name}</td>
                     <td style={td}>{item.phone || "-"}</td>
                     <td style={td}>
-                      <div style={{ display: "flex", gap: 8 }}>
+                      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                         <button
-                          style={{ ...reloadBtn, padding: "6px 12px", fontSize: 13 }}
+                          style={{ ...reloadBtn, padding: "6px 16px", fontSize: 13, borderRadius: 6 }}
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevents row selection override
+                            e.stopPropagation();
                             editCompany(item);
                           }}
                         >
                           Edit
                         </button>
                         <button
-                          style={{ ...clearBtn, padding: "6px 12px", fontSize: 13 }}
+                          style={{ ...clearBtn, padding: "6px 16px", fontSize: 13, borderRadius: 6 }}
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevents row selection override
+                            e.stopPropagation();
                             deleteCompany(item.id);
                           }}
                         >
@@ -278,7 +460,7 @@ export default function Company() {
                   </tr>
                 );
               })}
-            {companies.length === 0 && (
+            {companies.length === 0 && !loading && (
               <tr>
                 <td colSpan={5} style={{ ...td, textAlign: "center", color: "#64748b" }}>
                   No companies found.
@@ -288,11 +470,125 @@ export default function Company() {
           </tbody>
         </table>
       </div>
+
+      {/* Animation styles */}
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes slideOut {
+          from {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+          }
+        }
+        .animate-slide-in {
+          animation: slideIn 0.25s ease-out;
+        }
+        .animate-slide-out {
+          animation: slideOut 0.2s ease-in;
+        }
+      `}</style>
     </Layout>
   );
 }
 
-// Styles
+// Delete Toast Styles
+const deleteContainer = {
+  background: "white",
+  borderRadius: "12px",
+  padding: "24px",
+  width: "420px",
+  maxWidth: "90vw",
+  boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+  textAlign: "center",
+  animation: "slideIn 0.25s ease-out",
+};
+
+const deleteIconWrapper = {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "16px",
+};
+
+const deleteIconCircle = {
+  width: "56px",
+  height: "56px",
+  borderRadius: "50%",
+  background: "#fef2f2",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const deleteIconSvg = {
+  width: "32px",
+  height: "32px",
+  color: "#ef4444",
+};
+
+const deleteContent = {
+  marginBottom: "24px",
+};
+
+const deleteTitle = {
+  fontSize: "18px",
+  fontWeight: "600",
+  color: "#111827",
+  margin: "0 0 8px 0",
+};
+
+const deleteMessage = {
+  fontSize: "14px",
+  color: "#6b7280",
+  margin: "0",
+  lineHeight: "1.6",
+};
+
+const deleteActions = {
+  display: "flex",
+  gap: "10px",
+  justifyContent: "center",
+};
+
+const deleteButton = {
+  background: "#ef4444",
+  color: "white",
+  border: "none",
+  padding: "10px 32px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "500",
+  cursor: "pointer",
+  transition: "background 0.2s",
+  minWidth: "100px",
+};
+
+const cancelButton = {
+  background: "transparent",
+  color: "#374151",
+  border: "1px solid #d1d5db",
+  padding: "10px 32px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "500",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  minWidth: "100px",
+};
+
+// Main Styles
 const card = {
   background: "#fff",
   padding: 30,
@@ -349,6 +645,7 @@ const saveBtn = {
   padding: "12px 25px",
   borderRadius: 8,
   cursor: "pointer",
+  fontWeight: "500"
 };
 
 const reloadBtn = {
@@ -358,6 +655,7 @@ const reloadBtn = {
   padding: "12px 25px",
   borderRadius: 8,
   cursor: "pointer",
+  fontWeight: "500"
 };
 
 const clearBtn = {
@@ -367,6 +665,7 @@ const clearBtn = {
   padding: "12px 25px",
   borderRadius: 8,
   cursor: "pointer",
+  fontWeight: "500"
 };
 
 const table = {
@@ -385,11 +684,12 @@ const th = {
   border: "1px solid #e2e8f0",
   background: "#0f172a",
   color: "#fff",
-  textAlign: "left",
+  textAlign: "center",
 };
 
 const td = {
   padding: 12,
   border: "1px solid #e2e8f0",
   color: "#334155",
+  textAlign: "center",
 };

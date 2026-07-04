@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Invoice() {
   const API = "https://smarterp-1-6rfs.onrender.com/invoices/";
@@ -45,7 +46,14 @@ export default function Invoice() {
         if (current.editingId) {
           saveInvoice();
         } else {
-          alert("Select Invoice First");
+          toast.error("Please select an invoice first", {
+            position: "top-right",
+            duration: 3000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          });
         }
       }
       if (e.key === "F4") {
@@ -53,7 +61,14 @@ export default function Invoice() {
         if (current.selectedId) {
           deleteInvoice(current.selectedId);
         } else {
-          alert("Select Invoice First");
+          toast.error("Please select an invoice first", {
+            position: "top-right",
+            duration: 3000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          });
         }
       }
     };
@@ -67,8 +82,24 @@ export default function Invoice() {
       setLoading(true);
       const res = await axios.get(API);
       setInvoices(res.data);
+      toast.success("Invoices loaded successfully!", {
+        position: "top-right",
+        duration: 2000,
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load invoices", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -99,7 +130,14 @@ export default function Invoice() {
       !currentForm.quantity ||
       !currentForm.price
     ) {
-      alert("Please fill all fields");
+      toast.error("Please fill all required fields", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       return;
     }
 
@@ -112,19 +150,44 @@ export default function Invoice() {
       price: Number(currentForm.price),
     };
 
+    setLoading(true);
+
     try {
       if (currentEditingId) {
         await axios.put(`${API}${currentEditingId}`, data);
-        alert("Invoice Updated");
+        toast.success("Invoice Updated Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       } else {
         await axios.post(API, data);
-        alert("Invoice Saved");
+        toast.success("Invoice Saved Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       }
       clearForm();
       loadInvoices();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Server Error");
+      toast.error(err.response?.data?.detail || "Server Error", {
+        position: "top-right",
+        duration: 4000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,6 +204,15 @@ export default function Invoice() {
       price: item.price || "",
     });
 
+    toast.info("Editing invoice: " + item.invoice_no, {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#3b82f6",
+        color: "#fff"
+      }
+    });
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -148,17 +220,116 @@ export default function Invoice() {
   };
 
   const deleteInvoice = async (id) => {
-    if (!window.confirm("Delete this invoice?")) return;
+    // Custom confirm toast with pulsing animation icon
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? 'animate-enter' : 'animate-leave'
+        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center animate-pulse">
+                <span className="text-xl">⚠️</span>
+              </div>
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                Delete Invoice?
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                Are you sure you want to delete this invoice? This action cannot be undone.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex border-l border-gray-200">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              confirmDelete(id);
+            }}
+            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="w-full border border-transparent rounded-none p-4 flex items-center justify-center text-sm font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: "top-right"
+    });
+  };
+
+  const confirmDelete = async (id) => {
     try {
+      setLoading(true);
       await axios.delete(`${API}${id}`);
       loadInvoices();
+      toast.success("Invoice Deleted Successfully!", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
     } catch (err) {
       console.error(err);
+      toast.error("Failed to delete invoice", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Layout title="Invoice Management">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "14px"
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#22c55e",
+              color: "#fff"
+            }
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          },
+          info: {
+            duration: 2000,
+            style: {
+              background: "#3b82f6",
+              color: "#fff"
+            }
+          }
+        }}
+      />
+
       <div style={page}>
         <div style={card}>
           <h1 style={titleStyle}>Invoice Management</h1>
@@ -176,6 +347,11 @@ export default function Invoice() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={searchBox}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  // Optional: handle search
+                }
+              }}
             />
             {loading && <span style={{ color: "#64748b", fontSize: "14px" }}>Loading data...</span>}
           </div>
@@ -190,8 +366,8 @@ export default function Invoice() {
           </div>
 
           <div style={{ marginTop: 25 }}>
-            <button onClick={saveInvoice} style={saveBtn}>
-              {editingId ? "Update Invoice" : "Save Invoice"}
+            <button onClick={saveInvoice} style={saveBtn} disabled={loading}>
+              {loading ? "Processing..." : editingId ? "Update Invoice" : "Save Invoice"}
             </button>
             <button onClick={clearForm} style={newBtn}>
               New
@@ -202,15 +378,15 @@ export default function Invoice() {
             <table style={table}>
               <thead>
                 <tr style={thRow}>
-                  <th style={th}>ID</th>
+                  <th style={{ ...th, borderRadius: "8px 0 0 8px" }}>ID</th>
                   <th style={th}>Invoice</th>
                   <th style={th}>Date</th>
-                  <th style={th}>Customer</th>
+                  <th style={{ ...th, textAlign: "left", paddingLeft: "20px" }}>Customer</th>
                   <th style={th}>Product</th>
                   <th style={th}>Qty</th>
                   <th style={th}>Price</th>
                   <th style={th}>Total</th>
-                  <th style={th}>Action</th>
+                  <th style={{ ...th, borderRadius: "0 8px 8px 0" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,11 +406,15 @@ export default function Invoice() {
                         <td style={td}>{item.id}</td>
                         <td style={td}>{item.invoice_no}</td>
                         <td style={td}>{item.invoice_date}</td>
-                        <td style={td}>{item.customer_name}</td>
+                        <td style={{ ...td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
+                          {item.customer_name}
+                        </td>
                         <td style={td}>{item.product_name}</td>
                         <td style={td}>{item.quantity}</td>
                         <td style={td}>₹ {item.price}</td>
-                        <td style={td}>₹ {item.total_amount}</td>
+                        <td style={{ ...td, fontWeight: "bold", color: "#16a34a" }}>
+                          ₹ {item.total_amount}
+                        </td>
                         <td style={td}>
                           <button
                             onClick={(e) => { e.stopPropagation(); editInvoice(item); }}
@@ -255,8 +435,62 @@ export default function Invoice() {
               </tbody>
             </table>
           </div>
+
+          {!loading && invoices.length > 0 && (
+            <div style={summary}>
+              <span>Total Invoices: <strong>{invoices.length}</strong></span>
+              <span style={summaryDivider}>|</span>
+              <span>Total Amount: <strong style={{ color: "#16a34a" }}>
+                ₹ {invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toLocaleString()}
+              </strong></span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Animation styles for custom toast */}
+      <style>{`
+        @keyframes enter {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes leave {
+          from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+          }
+        }
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        .animate-enter {
+          animation: enter 0.3s ease-out;
+        }
+        .animate-leave {
+          animation: leave 0.2s ease-in;
+        }
+        .animate-pulse {
+          animation: pulse 0.8s ease-in-out infinite;
+        }
+      `}</style>
     </Layout>
   );
 }
@@ -284,7 +518,7 @@ const titleStyle = {
 };
 
 const shortcutBar = {
-  background: "#0f172a", // Dark matching bar color
+  background: "#0f172a",
   color: "#fff",
   padding: 15,
   borderRadius: 10,
@@ -374,14 +608,15 @@ const table = {
 };
 
 const thRow = {
-  background: "#0f172a" // Matches the dark bar header layout from the image
+  background: "#0f172a"
 };
 
 const th = {
   padding: "12px 15px",
   color: "#ffffff",
   fontWeight: "600",
-  fontSize: "14px"
+  fontSize: "14px",
+  textAlign: "center"
 };
 
 const tr = {
@@ -390,13 +625,29 @@ const tr = {
   background: "#ffffff"
 };
 
-// Applied dynamically on click matching the reference image's color
 const rowSelected = {
-  background: "#dbeafe" 
+  background: "#dbeafe"
 };
 
 const td = {
   padding: "12px 15px",
   fontSize: "14px",
-  color: "#334155"
+  color: "#334155",
+  textAlign: "center"
+};
+
+const summary = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "20px",
+  marginTop: "25px",
+  padding: "15px",
+  background: "#f8fafc",
+  borderRadius: "10px",
+  fontSize: "14px",
+  flexWrap: "wrap"
+};
+
+const summaryDivider = {
+  color: "#cbd5e1"
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
+import toast, { Toaster } from "react-hot-toast";
 
 const API = "https://smarterp-1-6rfs.onrender.com/purchases/";
 
@@ -22,6 +23,7 @@ export default function Purchases() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadPurchases();
@@ -42,7 +44,14 @@ export default function Purchases() {
         if (editingId) {
           savePurchase();
         } else {
-          alert("Select Purchase First");
+          toast.error("Please select a purchase first", {
+            position: "top-right",
+            duration: 3000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          });
         }
       }
 
@@ -51,7 +60,14 @@ export default function Purchases() {
         if (selectedId) {
           deletePurchase(selectedId);
         } else {
-          alert("Select Purchase First");
+          toast.error("Please select a purchase first", {
+            position: "top-right",
+            duration: 3000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          });
         }
       }
     };
@@ -68,6 +84,14 @@ export default function Purchases() {
       const res = await axios.get(API);
       setPurchases(res.data);
     } catch (err) {
+      toast.error("Failed to load purchases", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       console.log(err);
     }
   };
@@ -96,9 +120,18 @@ export default function Purchases() {
       !form.purchasePrice ||
       !form.totalAmount
     ) {
-      alert("Please fill all fields");
+      toast.error("Please fill all required fields", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       return;
     }
+
+    setLoading(true);
 
     try {
       const data = {
@@ -115,17 +148,40 @@ export default function Purchases() {
 
       if (editingId) {
         await axios.put(`${API}${editingId}`, data);
-        alert("Purchase Updated Successfully");
+        toast.success("Purchase Updated Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       } else {
         await axios.post(API, data);
-        alert("Purchase Added Successfully");
+        toast.success("Purchase Added Successfully!", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            background: "#22c55e",
+            color: "#fff"
+          }
+        });
       }
 
       clearForm();
       loadPurchases();
     } catch (err) {
+      toast.error(err.response?.data?.detail || "Server Error", {
+        position: "top-right",
+        duration: 4000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       console.log(err.response);
-      alert(err.response?.data?.detail || "Server Error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -145,6 +201,15 @@ export default function Purchases() {
       totalAmount: item.total_amount || "",
     });
 
+    toast.info("Editing purchase: " + item.invoice_no, {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#3b82f6",
+        color: "#fff"
+      }
+    });
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -152,18 +217,116 @@ export default function Purchases() {
   };
 
   const deletePurchase = async (id) => {
-    if (!window.confirm("Delete this Purchase?")) return;
+    // Custom confirm toast with pulsing animation icon
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? 'animate-enter' : 'animate-leave'
+        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center animate-pulse">
+                <span className="text-xl">⚠️</span>
+              </div>
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                Delete Purchase?
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                Are you sure you want to delete this purchase? This action cannot be undone.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex border-l border-gray-200">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              confirmDelete(id);
+            }}
+            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="w-full border border-transparent rounded-none p-4 flex items-center justify-center text-sm font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: "top-right"
+    });
+  };
 
+  const confirmDelete = async (id) => {
     try {
+      setLoading(true);
       await axios.delete(`${API}${id}`);
       loadPurchases();
+      toast.success("Purchase Deleted Successfully!", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
     } catch (err) {
+      toast.error("Failed to delete purchase", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          background: "#ef4444",
+          color: "#fff"
+        }
+      });
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Layout title="Purchases">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "14px"
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#22c55e",
+              color: "#fff"
+            }
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          },
+          info: {
+            duration: 2000,
+            style: {
+              background: "#3b82f6",
+              color: "#fff"
+            }
+          }
+        }}
+      />
+
       <div style={page}>
         <div style={card}>
           <h1>Purchase Master</h1>
@@ -254,8 +417,8 @@ export default function Purchases() {
             />
           </div>
 
-          <button onClick={savePurchase} style={saveBtn}>
-            {editingId ? "Update Purchase" : "Save Purchase"}
+          <button onClick={savePurchase} style={saveBtn} disabled={loading}>
+            {loading ? "Processing..." : editingId ? "Update Purchase" : "Save Purchase"}
           </button>
 
           <button onClick={clearForm} style={newBtn}>
@@ -270,6 +433,8 @@ export default function Purchases() {
             onChange={(e) => setSearch(e.target.value)}
             style={searchBox}
           />
+
+          {loading && <p style={{ color: "#3b82f6" }}>Loading...</p>}
 
           <table style={table}>
             <thead>
@@ -322,6 +487,50 @@ export default function Purchases() {
           </table>
         </div>
       </div>
+
+      {/* Animation styles for custom toast */}
+      <style>{`
+        @keyframes enter {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes leave {
+          from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+          }
+        }
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        .animate-enter {
+          animation: enter 0.3s ease-out;
+        }
+        .animate-leave {
+          animation: leave 0.2s ease-in;
+        }
+        .animate-pulse {
+          animation: pulse 0.8s ease-in-out infinite;
+        }
+      `}</style>
     </Layout>
   );
 }
@@ -377,6 +586,7 @@ const saveBtn = {
   borderRadius: 8,
   marginTop: 25,
   cursor: "pointer",
+  fontWeight: "500"
 };
 
 const newBtn = {
@@ -387,6 +597,7 @@ const newBtn = {
   borderRadius: 8,
   marginLeft: 10,
   cursor: "pointer",
+  fontWeight: "500"
 };
 
 const table = {
