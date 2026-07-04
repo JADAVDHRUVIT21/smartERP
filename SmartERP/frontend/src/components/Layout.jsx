@@ -4,8 +4,26 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 export default function Layout({ children, title }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [currentDateTime, setCurrentDateTime] = useState("");
+
+  // Update date and time every second
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      setCurrentDateTime(`${day}/${month}/${year} ${hours}:${minutes}:${seconds}`);
+    };
+
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Check if mobile
   useEffect(() => {
@@ -140,7 +158,10 @@ export default function Layout({ children, title }) {
             <h1 style={styles.pageTitle}>{title || 'Dashboard'}</h1>
           </div>
           <div style={styles.navbarRight}>
-            <span style={styles.userInfo}>Admin</span>
+            <div style={styles.userContainer}>
+              <span style={styles.adminText}>Admin</span>
+              <span style={styles.dateTimeText}>{currentDateTime}</span>
+            </div>
           </div>
         </header>
 
@@ -163,6 +184,12 @@ export default function Layout({ children, title }) {
           .page-title {
             font-size: 16px !important;
           }
+          .datetime-text {
+            font-size: 11px !important;
+          }
+          .admin-text {
+            font-size: 12px !important;
+          }
         }
         @media (max-width: 480px) {
           .page-title {
@@ -170,6 +197,9 @@ export default function Layout({ children, title }) {
           }
           .sidebar {
             width: 260px !important;
+          }
+          .datetime-text {
+            display: none !important;
           }
         }
         @media print {
@@ -180,6 +210,22 @@ export default function Layout({ children, title }) {
             margin-left: 0 !important;
             padding-top: 0 !important;
           }
+        }
+        .user-container {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 2px;
+        }
+        .admin-text {
+          color: #0f172a;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .datetime-text {
+          color: #64748b;
+          font-size: 12px;
+          font-weight: 400;
         }
       `}</style>
     </div>
@@ -336,12 +382,22 @@ const styles = {
   navbarRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
   },
-  userInfo: {
+  userContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '2px',
+  },
+  adminText: {
     color: '#0f172a',
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  dateTimeText: {
+    color: '#64748b',
+    fontSize: '12px',
+    fontWeight: '400',
   },
   content: {
     padding: '24px',
