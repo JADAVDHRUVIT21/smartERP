@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import toast, { Toaster } from "react-hot-toast";
+import { responsiveStyles } from "../styles/responsiveStyles";
 
 const API = "https://smarterp-1-6rfs.onrender.com/customers/";
 
@@ -207,11 +208,9 @@ export default function Customers() {
   };
 
   const deleteCustomer = async (id) => {
-    // Professional Delete Confirmation Toast
     toast.custom((t) => (
-      <div style={deleteOverlay}>
-        <div style={deleteContainer}>
-          {/* Warning Icon */}
+      <div style={responsiveStyles.deleteOverlay}>
+        <div style={responsiveStyles.deleteContainer}>
           <div style={deleteIconWrapper}>
             <div style={deleteIconCircle}>
               <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,7 +219,6 @@ export default function Customers() {
             </div>
           </div>
 
-          {/* Content */}
           <div style={deleteContent}>
             <h3 style={deleteTitle}>Delete Customer</h3>
             <p style={deleteMessage}>
@@ -228,8 +226,7 @@ export default function Customers() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div style={deleteActions}>
+          <div style={responsiveStyles.deleteActions}>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
@@ -333,24 +330,24 @@ export default function Customers() {
         }}
       />
 
-      <div style={page}>
-        <div style={card}>
-          <h1>Customer Master</h1>
+      <div style={responsiveStyles.page}>
+        <div style={responsiveStyles.card}>
+          <h1 style={responsiveStyles.title}>Customer Master</h1>
 
-          <div style={shortcut}>
+          <div style={responsiveStyles.shortcutBar}>
             <span>F1 Save Customer</span>
             <span>F2 New</span>
             <span>F4 Delete</span>
             <span>Enter Save</span>
           </div>
 
-          <div style={grid}>
+          <div style={responsiveStyles.grid}>
             <input
               name="customer_name"
-              placeholder="Enter Customer Name"
+              placeholder="Enter Customer Name *"
               value={form.customer_name}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -358,7 +355,7 @@ export default function Customers() {
               placeholder="Enter Phone Number"
               value={form.phone}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -366,7 +363,7 @@ export default function Customers() {
               placeholder="Enter Email Address"
               value={form.email}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -374,83 +371,166 @@ export default function Customers() {
               placeholder="Enter Customer Address"
               value={form.address}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
           </div>
 
-          <button onClick={saveCustomer} style={saveBtn} disabled={loading}>
-            {loading ? "Processing..." : editingId ? "Update Customer" : "Save Customer"}
-          </button>
+          <div style={responsiveStyles.buttonRow}>
+            <button 
+              onClick={saveCustomer} 
+              style={{
+                ...responsiveStyles.saveBtn,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
+              }} 
+              disabled={loading}
+            >
+              {loading ? "Processing..." : editingId ? "Update Customer" : "Save Customer"}
+            </button>
 
-          <button onClick={clearForm} style={newBtn}>
-            New
-          </button>
+            <button onClick={clearForm} style={responsiveStyles.reloadBtn}>
+              New
+            </button>
+          </div>
 
-          <h2>Customer List</h2>
+          <h2 style={responsiveStyles.h2}>Customer List</h2>
 
           <input
             placeholder="Search Customer"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={searchBox}
+            style={{
+              ...responsiveStyles.searchBox,
+              marginBottom: 20,
+            }}
           />
 
-          {loading && <p style={{ color: "#3b82f6" }}>Loading...</p>}
+          {loading && <p style={loadingText}>Loading...</p>}
 
-          <table style={table}>
-            <thead>
-              <tr>
-                <th style={th}>ID</th>
-                <th style={th}>Customer</th>
-                <th style={th}>Phone</th>
-                <th style={th}>Email</th>
-                <th style={th}>Address</th>
-                <th style={th}>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {customers
-                .filter(c =>
-                  c.customer_name
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
-                )
-                .map(c => (
-                  <tr
-                    key={c.id}
-                    onClick={() => setSelectedId(c.id)}
-                    style={
-                      selectedId === c.id
-                        ? selectedRow
-                        : row
-                    }
-                  >
-                    <td style={td}>{c.id}</td>
-                    <td style={td}>{c.customer_name}</td>
-                    <td style={td}>{c.phone}</td>
-                    <td style={td}>{c.email}</td>
-                    <td style={td}>{c.address}</td>
-
-                    <td style={td}>
+          {/* Mobile Card View for Customers */}
+          <div style={mobileCardContainer}>
+            {customers
+              .filter(c =>
+                c.customer_name
+                  .toLowerCase()
+                  .includes(search.toLowerCase())
+              )
+              .map(c => (
+                <div
+                  key={c.id}
+                  style={{
+                    ...mobileCard,
+                    ...(selectedId === c.id ? mobileCardSelected : {})
+                  }}
+                  onClick={() => setSelectedId(c.id)}
+                >
+                  <div style={mobileCardContent}>
+                    <div style={mobileCardRow}>
+                      <span style={mobileCardLabel}>Customer:</span>
+                      <span style={mobileCardValue}>{c.customer_name}</span>
+                    </div>
+                    <div style={mobileCardRow}>
+                      <span style={mobileCardLabel}>Phone:</span>
+                      <span style={mobileCardValue}>{c.phone || "-"}</span>
+                    </div>
+                    <div style={mobileCardRow}>
+                      <span style={mobileCardLabel}>Email:</span>
+                      <span style={mobileCardValue}>{c.email || "-"}</span>
+                    </div>
+                    <div style={mobileCardRow}>
+                      <span style={mobileCardLabel}>Address:</span>
+                      <span style={mobileCardValue}>{c.address || "-"}</span>
+                    </div>
+                    <div style={mobileCardActions}>
                       <button
                         onClick={() => editCustomer(c)}
-                        style={editBtn}
+                        style={responsiveStyles.editBtn}
                       >
                         Edit
                       </button>
-
                       <button
                         onClick={() => deleteCustomer(c.id)}
-                        style={deleteBtn}
+                        style={responsiveStyles.deleteBtn}
                       >
                         Delete
                       </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            {customers.length === 0 && !loading && (
+              <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
+                No customers found.
+              </p>
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div style={tableWrapper}>
+            <table style={responsiveStyles.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "8px 0 0 8px" }}>ID</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px" }}>Customer</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Phone</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "150px" }}>Email</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px" }}>Address</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "0 8px 8px 0", minWidth: "130px" }}>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {customers
+                  .filter(c =>
+                    c.customer_name
+                      .toLowerCase()
+                      .includes(search.toLowerCase())
+                  )
+                  .map(c => (
+                    <tr
+                      key={c.id}
+                      onClick={() => setSelectedId(c.id)}
+                      style={
+                        selectedId === c.id
+                          ? responsiveStyles.selectedRow
+                          : responsiveStyles.row
+                      }
+                    >
+                      <td style={responsiveStyles.td}>{c.id}</td>
+                      <td style={responsiveStyles.td}>{c.customer_name}</td>
+                      <td style={responsiveStyles.td}>{c.phone || "-"}</td>
+                      <td style={responsiveStyles.td}>{c.email || "-"}</td>
+                      <td style={responsiveStyles.td}>{c.address || "-"}</td>
+
+                      <td style={responsiveStyles.td}>
+                        <div style={actionButtonGroup}>
+                          <button
+                            onClick={() => editCustomer(c)}
+                            style={responsiveStyles.editBtn}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteCustomer(c.id)}
+                            style={responsiveStyles.deleteBtn}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                {customers.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={6} style={{ ...responsiveStyles.td, textAlign: "center", color: "#64748b" }}>
+                      No customers found.
                     </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -496,31 +576,24 @@ export default function Customers() {
         .animate-pulse {
           animation: pulse 1s ease-in-out infinite;
         }
+
+        /* Hide mobile cards on desktop, hide table on mobile */
+        @media (min-width: 769px) {
+          .mobile-cards {
+            display: none !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .desktop-table {
+            display: none !important;
+          }
+        }
       `}</style>
     </Layout>
   );
 }
 
 // Delete Toast Styles
-const deleteOverlay = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "100vh",
-  padding: "20px",
-};
-
-const deleteContainer = {
-  background: "white",
-  borderRadius: "16px",
-  padding: "32px",
-  width: "440px",
-  maxWidth: "95vw",
-  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
-  textAlign: "center",
-  animation: "fadeIn 0.25s ease-out",
-};
-
 const deleteIconWrapper = {
   display: "flex",
   justifyContent: "center",
@@ -562,12 +635,6 @@ const deleteMessage = {
   lineHeight: "1.6",
 };
 
-const deleteActions = {
-  display: "flex",
-  gap: "12px",
-  justifyContent: "center",
-};
-
 const deleteButton = {
   background: "#ef4444",
   color: "white",
@@ -594,117 +661,95 @@ const cancelButton = {
   minWidth: "120px",
 };
 
-const page = {
-  background: "#f1f5f9",
-  padding: 30,
-  minHeight: "100vh"
-};
-
-const card = {
-  background: "#fff",
-  padding: 30,
-  borderRadius: 15,
-  boxShadow: "0 5px 20px rgba(0,0,0,.1)"
-};
-
-const shortcut = {
-  background: "#111827",
-  color: "#fff",
-  padding: 15,
-  borderRadius: 10,
-  display: "flex",
-  gap: 30,
-  marginBottom: 25,
-  fontWeight: "bold"
-};
-
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-  gap: 15
-};
-
-const input = {
-  padding: 12,
-  border: "1px solid #cbd5e1",
-  borderRadius: 8
-};
-
-const saveBtn = {
-  background: "#16a34a",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginTop: 25,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const newBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginLeft: 10,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const searchBox = {
-  padding: 12,
-  width: 250,
-  borderRadius: 8,
-  border: "1px solid #ccc",
-  marginTop: 20,
-  marginBottom: 20
-};
-
-const table = {
-  width: "100%",
-  marginTop: 20,
-  borderCollapse: "collapse"
-};
-
-const th = {
-  padding: 15,
-  background: "#0f172a",
-  color: "#fff"
-};
-
-const td = {
-  padding: 14,
+const loadingText = {
+  color: "#3b82f6",
   textAlign: "center",
-  borderBottom: "1px solid #ddd"
+  padding: "20px",
 };
 
-const row = {
-  cursor: "pointer"
+const tableWrapper = {
+  overflowX: "auto",
+  marginTop: "20px",
+  WebkitOverflowScrolling: "touch",
 };
 
-const selectedRow = {
-  background: "#dbeafe",
-  cursor: "pointer"
+const actionButtonGroup = {
+  display: "flex",
+  gap: "8px",
+  justifyContent: "center",
+  flexWrap: "wrap",
 };
 
-const editBtn = {
-  background: "#f59e0b",
-  color: "#fff",
-  border: 0,
-  padding: "7px 15px",
-  borderRadius: 6,
-  marginRight: 8,
+// Mobile Card Styles
+const mobileCardContainer = {
+  display: "none",
+  flexDirection: "column",
+  gap: "12px",
+  marginTop: "20px",
+  width: "100%",
+};
+
+const mobileCard = {
+  background: "#ffffff",
+  borderRadius: "10px",
+  padding: "16px",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+  border: "1px solid #e2e8f0",
   cursor: "pointer",
-  fontWeight: "500"
+  transition: "all 0.2s",
+  width: "100%",
+  boxSizing: "border-box",
 };
 
-const deleteBtn = {
-  background: "#dc2626",
-  color: "#fff",
-  border: 0,
-  padding: "7px 15px",
-  borderRadius: 6,
-  cursor: "pointer",
-  fontWeight: "500"
+const mobileCardSelected = {
+  border: "2px solid #3b82f6",
+  background: "#eff6ff",
 };
+
+const mobileCardContent = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "6px",
+};
+
+const mobileCardRow = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "4px 0",
+};
+
+const mobileCardLabel = {
+  fontSize: "13px",
+  fontWeight: "600",
+  color: "#64748b",
+};
+
+const mobileCardValue = {
+  fontSize: "13px",
+  color: "#0f172a",
+  fontWeight: "500",
+  textAlign: "right",
+  wordBreak: "break-word",
+  maxWidth: "60%",
+};
+
+const mobileCardActions = {
+  display: "flex",
+  gap: "8px",
+  marginTop: "10px",
+  justifyContent: "flex-end",
+  borderTop: "1px solid #e2e8f0",
+  paddingTop: "10px",
+};
+
+// Inject mobile styles
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @media (max-width: 768px) {
+    .mobile-cards {
+      display: flex !important;
+    }
+  }
+`;
+document.head.appendChild(styleSheet);

@@ -1,22 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Layout({ children, title }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Update date and time every second
+  // Update date and time every second (12-hour format)
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
       const day = String(now.getDate()).padStart(2, '0');
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
+      
+      let hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const hoursStr = String(hours).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
-      setCurrentDateTime(`${day}/${month}/${year} ${hours}:${minutes}:${seconds}`);
+      
+      setCurrentDateTime(`${day}/${month}/${year} ${hoursStr}:${minutes}:${seconds} ${ampm}`);
     };
 
     updateDateTime();
@@ -41,9 +50,83 @@ export default function Layout({ children, title }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Handle logout with confirmation
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    toast.custom((t) => (
+      <div style={confirmOverlay}>
+        <div style={confirmContainer}>
+          <div style={confirmIconWrapper}>
+            <div style={confirmIconCircle}>
+              <svg style={confirmIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </div>
+          </div>
+          <div style={confirmContent}>
+            <h3 style={confirmTitle}>Logout Confirmation</h3>
+            <p style={confirmMessage}>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </p>
+          </div>
+          <div style={confirmActions}>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                performLogout();
+              }}
+              style={confirmYesButton}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#dc2626";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "#ef4444";
+              }}
+            >
+              Yes, Logout
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              style={confirmNoButton}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#f3f4f6";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "transparent";
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      position: "top-center",
+    });
+  };
+
+  // Perform actual logout
+  const performLogout = () => {
+    localStorage.clear();
+    
+    toast.success("Logout Successful! Redirecting to login page...", {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#22c55e",
+        color: "#fff",
+        padding: "16px",
+        borderRadius: "8px",
+      },
+    });
+
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
   };
 
   // All menu items - flat structure
@@ -65,6 +148,38 @@ export default function Layout({ children, title }) {
 
   return (
     <div style={styles.container}>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            padding: "16px",
+            borderRadius: "8px",
+            fontSize: "14px"
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#22c55e",
+              color: "#fff"
+            }
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ef4444",
+              color: "#fff"
+            }
+          },
+          info: {
+            duration: 2000,
+            style: {
+              background: "#3b82f6",
+              color: "#fff"
+            }
+          }
+        }}
+      />
+
       {/* Mobile Overlay */}
       {sidebarOpen && isMobile && (
         <div 
@@ -118,15 +233,10 @@ export default function Layout({ children, title }) {
           })}
         </nav>
 
-        {/* Logout */}
+        {/* Logout Button - Simple, matching other menu items */}
         <div style={styles.logoutContainer}>
           <button 
-            onClick={() => {
-              handleLogout();
-              if (isMobile) {
-                setSidebarOpen(false);
-              }
-            }} 
+            onClick={handleLogout}
             style={styles.logoutBtn}
           >
             <span style={styles.menuText}>Logout</span>
@@ -172,6 +282,27 @@ export default function Layout({ children, title }) {
       </main>
 
       <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
         @media (max-width: 1024px) {
           .sidebar {
             width: 280px !important;
@@ -227,10 +358,109 @@ export default function Layout({ children, title }) {
           font-size: 12px;
           font-weight: 400;
         }
+        /* Logout hover effect */
+        .logout-btn:hover {
+          background-color: #dc2626;
+          color: #ffffff;
+          border-radius: 8px;
+        }
       `}</style>
     </div>
   );
 }
+
+// Confirmation Toast Styles
+const confirmOverlay = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "100vh",
+  padding: "20px",
+};
+
+const confirmContainer = {
+  background: "white",
+  borderRadius: "16px",
+  padding: "32px",
+  width: "420px",
+  maxWidth: "95vw",
+  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
+  textAlign: "center",
+  animation: "fadeIn 0.25s ease-out",
+};
+
+const confirmIconWrapper = {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "20px",
+};
+
+const confirmIconCircle = {
+  width: "64px",
+  height: "64px",
+  borderRadius: "50%",
+  background: "#fef2f2",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  animation: "pulse 1s ease-in-out infinite",
+};
+
+const confirmIconSvg = {
+  width: "36px",
+  height: "36px",
+  color: "#ef4444",
+};
+
+const confirmContent = {
+  marginBottom: "28px",
+};
+
+const confirmTitle = {
+  fontSize: "20px",
+  fontWeight: "600",
+  color: "#111827",
+  margin: "0 0 8px 0",
+};
+
+const confirmMessage = {
+  fontSize: "14px",
+  color: "#6b7280",
+  margin: "0",
+  lineHeight: "1.6",
+};
+
+const confirmActions = {
+  display: "flex",
+  gap: "12px",
+  justifyContent: "center",
+};
+
+const confirmYesButton = {
+  background: "#ef4444",
+  color: "white",
+  border: "none",
+  padding: "10px 36px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  transition: "background 0.2s",
+  minWidth: "120px",
+};
+
+const confirmNoButton = {
+  background: "transparent",
+  color: "#374151",
+  border: "1px solid #d1d5db",
+  padding: "10px 36px",
+  borderRadius: "8px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  minWidth: "120px",
+};
 
 const styles = {
   container: {
@@ -268,6 +498,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexShrink: 0,
   },
   logo: {
     display: 'flex',
@@ -320,20 +551,21 @@ const styles = {
   logoutContainer: {
     padding: '16px 20px',
     borderTop: '1px solid #1e293b',
+    flexShrink: 0,
   },
   logoutBtn: {
     display: 'flex',
     alignItems: 'center',
     width: '100%',
     padding: '12px 24px',
-    background: 'none',
+    background: 'transparent',
     border: 'none',
     color: '#94a3b8',
     cursor: 'pointer',
     fontSize: '15px',
     borderRadius: '8px',
     transition: 'all 0.2s',
-    margin: '0 10px',
+    margin: '2px 10px',
   },
   main: {
     flex: 1,
