@@ -153,7 +153,9 @@ function Login() {
 
           <div style={styles.footer}>
             <p style={styles.footerText}>
-              Don't have an account? <span style={styles.link}>Contact Admin</span>
+              UserName: <span style={styles.link}>admin</span>
+              <p></p>
+              Password: <span style={styles.link}>admin123</span>
             </p>
           </div>
         </div>
