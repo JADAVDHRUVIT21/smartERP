@@ -272,11 +272,11 @@ export default function Stock() {
                       </td>
                       <td style={responsiveStyles.td}>
                         {item.available_qty > 10 ? (
-                          <span style={statusGreen}>✅ In Stock</span>
+                          <span style={statusGreen}> In Stock</span>
                         ) : item.available_qty > 0 ? (
-                          <span style={statusOrange}>⚠️ Low Stock</span>
+                          <span style={statusOrange}> Low Stock</span>
                         ) : (
-                          <span style={statusRed}>❌ Out of Stock</span>
+                          <span style={statusRed}>Out of Stock</span>
                         )}
                       </td>
                     </tr>
