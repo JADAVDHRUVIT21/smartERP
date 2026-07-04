@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import toast, { Toaster } from "react-hot-toast";
+import { responsiveStyles } from "../styles/responsiveStyles";
 
 export default function Invoice() {
   const API = "https://smarterp-1-6rfs.onrender.com/invoices/";
@@ -228,11 +229,9 @@ export default function Invoice() {
   };
 
   const deleteInvoice = async (id) => {
-    // Professional Delete Confirmation Toast
     toast.custom((t) => (
-      <div style={deleteOverlay}>
-        <div style={deleteContainer}>
-          {/* Warning Icon */}
+      <div style={responsiveStyles.deleteOverlay}>
+        <div style={responsiveStyles.deleteContainer}>
           <div style={deleteIconWrapper}>
             <div style={deleteIconCircle}>
               <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +240,6 @@ export default function Invoice() {
             </div>
           </div>
 
-          {/* Content */}
           <div style={deleteContent}>
             <h3 style={deleteTitle}>Delete Invoice</h3>
             <p style={deleteMessage}>
@@ -249,8 +247,7 @@ export default function Invoice() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div style={deleteActions}>
+          <div style={responsiveStyles.deleteActions}>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
@@ -349,63 +346,108 @@ export default function Invoice() {
         }}
       />
 
-      <div style={page}>
-        <div style={card}>
-          <h1 style={titleStyle}>Invoice Management</h1>
+      <div style={responsiveStyles.page}>
+        <div style={responsiveStyles.card}>
+          <h1 style={responsiveStyles.title}>Invoice Management</h1>
 
-          <div style={shortcutBar}>
-            <span><kbd style={kbdStyle}>F1</kbd> Save Invoice</span>
-            <span><kbd style={kbdStyle}>F2</kbd> New Invoice</span>
-            <span><kbd style={kbdStyle}>F3</kbd> Update Invoice</span>
-            <span><kbd style={kbdStyle}>F4</kbd> Delete Invoice</span>
+          <div style={responsiveStyles.shortcutBar}>
+            <span>F1 Save Invoice</span>
+            <span>F2 New Invoice</span>
+            <span>F3 Update Invoice</span>
+            <span>F4 Delete Invoice</span>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
-            <input
-              placeholder="Search Customer"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={searchBox}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  // Optional: handle search
-                }
-              }}
+          <div style={responsiveStyles.grid}>
+            <input 
+              placeholder="Invoice No *" 
+              name="invoiceNo" 
+              value={form.invoiceNo} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
             />
-            {loading && <span style={{ color: "#64748b", fontSize: "14px" }}>Loading data...</span>}
+            <input 
+              type="date" 
+              name="invoiceDate" 
+              value={form.invoiceDate} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
+            />
+            <input 
+              placeholder="Customer Name *" 
+              name="customerName" 
+              value={form.customerName} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
+            />
+            <input 
+              placeholder="Product Name *" 
+              name="productName" 
+              value={form.productName} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
+            />
+            <input 
+              type="number" 
+              placeholder="Quantity *" 
+              name="quantity" 
+              value={form.quantity} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
+            />
+            <input 
+              type="number" 
+              placeholder="Price *" 
+              name="price" 
+              value={form.price} 
+              onChange={handleChange} 
+              style={responsiveStyles.input} 
+            />
           </div>
 
-          <div style={grid}>
-            <input placeholder="Invoice No" name="invoiceNo" value={form.invoiceNo} onChange={handleChange} style={input} />
-            <input type="date" name="invoiceDate" value={form.invoiceDate} onChange={handleChange} style={input} />
-            <input placeholder="Customer Name" name="customerName" value={form.customerName} onChange={handleChange} style={input} />
-            <input placeholder="Product Name" name="productName" value={form.productName} onChange={handleChange} style={input} />
-            <input type="number" placeholder="Quantity" name="quantity" value={form.quantity} onChange={handleChange} style={input} />
-            <input type="number" placeholder="Price" name="price" value={form.price} onChange={handleChange} style={input} />
-          </div>
-
-          <div style={{ marginTop: 25 }}>
-            <button onClick={saveInvoice} style={saveBtn} disabled={loading}>
+          <div style={responsiveStyles.buttonRow}>
+            <button 
+              onClick={saveInvoice} 
+              style={{
+                ...responsiveStyles.saveBtn,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
+              }} 
+              disabled={loading}
+            >
               {loading ? "Processing..." : editingId ? "Update Invoice" : "Save Invoice"}
             </button>
-            <button onClick={clearForm} style={newBtn}>
+            <button onClick={clearForm} style={responsiveStyles.reloadBtn}>
               New
             </button>
           </div>
 
-          <div style={tableContainer}>
-            <table style={table}>
+          <h2 style={responsiveStyles.h2}>Invoice List</h2>
+
+          <input
+            placeholder="Search Customer"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              ...responsiveStyles.searchBox,
+              marginBottom: 20,
+            }}
+          />
+
+          {loading && <p style={loadingText}>Loading...</p>}
+
+          <div style={tableWrapper}>
+            <table style={responsiveStyles.table}>
               <thead>
-                <tr style={thRow}>
-                  <th style={{ ...th, borderRadius: "8px 0 0 8px" }}>ID</th>
-                  <th style={th}>Invoice</th>
-                  <th style={th}>Date</th>
-                  <th style={{ ...th, textAlign: "left", paddingLeft: "20px" }}>Customer</th>
-                  <th style={th}>Product</th>
-                  <th style={th}>Qty</th>
-                  <th style={th}>Price</th>
-                  <th style={th}>Total</th>
-                  <th style={{ ...th, borderRadius: "0 8px 8px 0" }}>Action</th>
+                <tr>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "8px 0 0 8px" }}>ID</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Invoice</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Date</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px", textAlign: "left", paddingLeft: "20px" }}>Customer</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px" }}>Product</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "60px" }}>Qty</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "80px" }}>Price</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Total</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "0 8px 8px 0", minWidth: "130px" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -418,45 +460,54 @@ export default function Invoice() {
                         key={item.id}
                         onClick={() => setSelectedId(item.id)}
                         style={{
-                          ...tr,
-                          ...(isSelected ? rowSelected : {})
+                          ...responsiveStyles.row,
+                          ...(isSelected ? responsiveStyles.selectedRow : {})
                         }}
                       >
-                        <td style={td}>{item.id}</td>
-                        <td style={td}>{item.invoice_no}</td>
-                        <td style={td}>{item.invoice_date}</td>
-                        <td style={{ ...td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
+                        <td style={responsiveStyles.td}>{item.id}</td>
+                        <td style={responsiveStyles.td}>{item.invoice_no}</td>
+                        <td style={responsiveStyles.td}>{item.invoice_date}</td>
+                        <td style={{ ...responsiveStyles.td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
                           {item.customer_name}
                         </td>
-                        <td style={td}>{item.product_name}</td>
-                        <td style={td}>{item.quantity}</td>
-                        <td style={td}>₹ {item.price}</td>
-                        <td style={{ ...td, fontWeight: "bold", color: "#16a34a" }}>
+                        <td style={responsiveStyles.td}>{item.product_name}</td>
+                        <td style={responsiveStyles.td}>{item.quantity}</td>
+                        <td style={responsiveStyles.td}>₹ {item.price}</td>
+                        <td style={{ ...responsiveStyles.td, fontWeight: "bold", color: "#16a34a" }}>
                           ₹ {item.total_amount}
                         </td>
-                        <td style={td}>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); editInvoice(item); }}
-                            style={editBtn}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); deleteInvoice(item.id); }}
-                            style={deleteBtn}
-                          >
-                            Delete
-                          </button>
+                        <td style={responsiveStyles.td}>
+                          <div style={actionButtonGroup}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); editInvoice(item); }}
+                              style={responsiveStyles.editBtn}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteInvoice(item.id); }}
+                              style={responsiveStyles.deleteBtn}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
                   })}
+                {invoices.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={9} style={{ ...responsiveStyles.td, textAlign: "center", color: "#64748b" }}>
+                      No invoices found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
 
           {!loading && invoices.length > 0 && (
-            <div style={summary}>
+            <div style={responsiveStyles.summary}>
               <span>Total Invoices: <strong>{invoices.length}</strong></span>
               <span style={summaryDivider}>|</span>
               <span>Total Amount: <strong style={{ color: "#16a34a" }}>
@@ -509,31 +560,22 @@ export default function Invoice() {
         .animate-pulse {
           animation: pulse 1s ease-in-out infinite;
         }
+
+        @media (max-width: 768px) {
+          .action-buttons {
+            flex-direction: column;
+            gap: 4px;
+          }
+          .action-buttons button {
+            width: 100%;
+          }
+        }
       `}</style>
     </Layout>
   );
 }
 
 // Delete Toast Styles
-const deleteOverlay = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "100vh",
-  padding: "20px",
-};
-
-const deleteContainer = {
-  background: "white",
-  borderRadius: "16px",
-  padding: "32px",
-  width: "440px",
-  maxWidth: "95vw",
-  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
-  textAlign: "center",
-  animation: "fadeIn 0.25s ease-out",
-};
-
 const deleteIconWrapper = {
   display: "flex",
   justifyContent: "center",
@@ -575,12 +617,6 @@ const deleteMessage = {
   lineHeight: "1.6",
 };
 
-const deleteActions = {
-  display: "flex",
-  gap: "12px",
-  justifyContent: "center",
-};
-
 const deleteButton = {
   background: "#ef4444",
   color: "white",
@@ -607,157 +643,23 @@ const cancelButton = {
   minWidth: "120px",
 };
 
-// --- Dynamic Matching UI Styles ---
-const page = {
-  background: "#f8fafc",
-  padding: "30px",
-  minHeight: "100vh",
-  fontFamily: "system-ui, -apple-system, sans-serif"
+const loadingText = {
+  color: "#3b82f6",
+  textAlign: "center",
+  padding: "20px",
 };
 
-const card = {
-  background: "#fff",
-  padding: 30,
-  borderRadius: 15,
-  boxShadow: "0 5px 20px rgba(0,0,0,.08)"
-};
-
-const titleStyle = {
-  margin: "0 0 20px 0",
-  fontSize: "24px",
-  color: "#0f172a",
-  fontWeight: "bold"
-};
-
-const shortcutBar = {
-  background: "#0f172a",
-  color: "#fff",
-  padding: 15,
-  borderRadius: 10,
-  display: "flex",
-  gap: 30,
-  fontWeight: "bold",
-  fontSize: "14px"
-};
-
-const kbdStyle = {
-  background: "#1e293b",
-  padding: "2px 6px",
-  borderRadius: "4px",
-  marginRight: "6px"
-};
-
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 15,
-  marginTop: 25
-};
-
-const input = {
-  padding: 12,
-  border: "1px solid #cbd5e1",
-  borderRadius: 8,
-  fontSize: "14px"
-};
-
-const searchBox = {
-  ...input,
-  width: 250
-};
-
-const saveBtn = {
-  background: "#16a34a",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  fontWeight: "bold",
-  cursor: "pointer"
-};
-
-const newBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  fontWeight: "bold",
-  marginLeft: 10,
-  cursor: "pointer"
-};
-
-const editBtn = {
-  background: "#f59e0b",
-  color: "#fff",
-  border: 0,
-  padding: "7px 15px",
-  borderRadius: 4,
-  marginRight: 6,
-  cursor: "pointer"
-};
-
-const deleteBtn = {
-  background: "#dc2626",
-  color: "#fff",
-  border: 0,
-  padding: "7px 15px",
-  borderRadius: 4,
-  cursor: "pointer"
-};
-
-const tableContainer = {
+const tableWrapper = {
   overflowX: "auto",
-  marginTop: 25,
-  borderRadius: "8px 8px 0 0",
-  border: "1px solid #e2e8f0"
+  marginTop: "20px",
+  WebkitOverflowScrolling: "touch",
 };
 
-const table = {
-  width: "100%",
-  borderCollapse: "collapse",
-  textAlign: "left"
-};
-
-const thRow = {
-  background: "#0f172a"
-};
-
-const th = {
-  padding: "12px 15px",
-  color: "#ffffff",
-  fontWeight: "600",
-  fontSize: "14px",
-  textAlign: "center"
-};
-
-const tr = {
-  borderBottom: "1px solid #e2e8f0",
-  cursor: "pointer",
-  background: "#ffffff"
-};
-
-const rowSelected = {
-  background: "#dbeafe"
-};
-
-const td = {
-  padding: "12px 15px",
-  fontSize: "14px",
-  color: "#334155",
-  textAlign: "center"
-};
-
-const summary = {
+const actionButtonGroup = {
   display: "flex",
+  gap: "8px",
   justifyContent: "center",
-  gap: "20px",
-  marginTop: "25px",
-  padding: "15px",
-  background: "#f8fafc",
-  borderRadius: "10px",
-  fontSize: "14px",
-  flexWrap: "wrap"
+  flexWrap: "wrap",
 };
 
 const summaryDivider = {

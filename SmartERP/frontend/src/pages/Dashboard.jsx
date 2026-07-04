@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
-// 1. Import chart components from Recharts
+import { responsiveStyles } from "../styles/responsiveStyles";
 import {
   BarChart,
   Bar,
@@ -44,8 +44,6 @@ export default function Dashboard() {
         }
       );
 
-      console.log("Dashboard Response:", res.data);
-
       setData({
         purchase: res.data.purchase || 0,
         sales: res.data.sales || 0,
@@ -57,14 +55,9 @@ export default function Dashboard() {
       });
     } catch (err) {
       console.error("Dashboard Error:", err);
-      if (err.response) {
-        console.log("Status:", err.response.status);
-        console.log("Response:", err.response.data);
-      }
     }
   };
 
-  // 2. Prepare data structures for the charts
   const financialData = [
     { name: "Total Purchase", Amount: data.purchase },
     { name: "Total Sales", Amount: data.sales },
@@ -78,16 +71,14 @@ export default function Dashboard() {
     { name: "Stock Items", value: data.stock },
   ];
 
-  // Colors for the Pie Chart sections
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
 
-  // Custom tooltips to show clean currency formatting in the bar chart
   const renderCurrencyTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div style={{ backgroundColor: "#fff", padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
-          <p style={{ margin: 0, fontWeight: "bold" }}>{payload[0].name}</p>
-          <p style={{ margin: 0, color: "#2563eb" }}>
+        <div style={tooltipContainer}>
+          <p style={tooltipTitle}>{payload[0].name}</p>
+          <p style={tooltipValue}>
             ₹ {Number(payload[0].value).toLocaleString("en-IN")}
           </p>
         </div>
@@ -98,87 +89,66 @@ export default function Dashboard() {
 
   return (
     <Layout title="Dashboard">
-      <div style={{ padding: 30, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
-        <h2 style={{ fontSize: 32, fontWeight: "bold", marginBottom: 30, color: "#1e293b" }}>
-          Finance Overview
-        </h2>
+      <div style={responsiveStyles.page}>
+        <h2 style={dashboardTitle}>Finance Overview</h2>
 
-        {/* --- KPI Cards Section --- */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
-            gap: 25,
-          }}
-        >
-          <div style={{ background: "#2563eb", color: "#fff", padding: 25, borderRadius: 15 }}>
-            <h3 style={{ margin: 0, opacity: 0.9, fontSize: "1.1rem" }}>Total Purchase</h3>
-            <h1 style={{ margin: "10px 0 0 0" }}>₹ {Number(data.purchase).toLocaleString("en-IN")}</h1>
+        {/* KPI Cards */}
+        <div style={kpiGrid}>
+          <div style={{ ...responsiveStyles.kpiCard, background: "#2563eb" }}>
+            <h3 style={kpiLabel}>Total Purchase</h3>
+            <h1 style={kpiValue}>₹ {Number(data.purchase).toLocaleString("en-IN")}</h1>
           </div>
 
-          <div style={{ background: "#16a34a", color: "#fff", padding: 25, borderRadius: 15 }}>
-            <h3 style={{ margin: 0, opacity: 0.9, fontSize: "1.1rem" }}>Total Sales</h3>
-            <h1 style={{ margin: "10px 0 0 0" }}>₹ {Number(data.sales).toLocaleString("en-IN")}</h1>
+          <div style={{ ...responsiveStyles.kpiCard, background: "#16a34a" }}>
+            <h3 style={kpiLabel}>Total Sales</h3>
+            <h1 style={kpiValue}>₹ {Number(data.sales).toLocaleString("en-IN")}</h1>
           </div>
 
-          <div style={{ background: data.profit >= 0 ? "#059669" : "#dc2626", color: "#fff", padding: 25, borderRadius: 15 }}>
-            <h3 style={{ margin: 0, opacity: 0.9, fontSize: "1.1rem" }}>Profit</h3>
-            <h1 style={{ margin: "10px 0 0 0" }}>₹ {Number(data.profit).toLocaleString("en-IN")}</h1>
+          <div style={{ 
+            ...responsiveStyles.kpiCard, 
+            background: data.profit >= 0 ? "#059669" : "#dc2626" 
+          }}>
+            <h3 style={kpiLabel}>Profit</h3>
+            <h1 style={kpiValue}>₹ {Number(data.profit).toLocaleString("en-IN")}</h1>
           </div>
         </div>
 
-        {/* --- Count Cards Section --- */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
-            gap: 20,
-            marginTop: 40,
-          }}
-        >
-          <div style={{ background: "#fff", padding: 20, borderRadius: 12, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ color: "#64748b", margin: 0 }}>Products</h3>
-            <h1 style={{ color: "#1e293b", margin: "10px 0 0 0" }}>{data.products}</h1>
+        {/* Count Cards */}
+        <div style={countGrid}>
+          <div style={countCard}>
+            <h3 style={countLabel}>Products</h3>
+            <h1 style={countValue}>{data.products}</h1>
           </div>
 
-          <div style={{ background: "#fff", padding: 20, borderRadius: 12, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ color: "#64748b", margin: 0 }}>Customers</h3>
-            <h1 style={{ color: "#1e293b", margin: "10px 0 0 0" }}>{data.customers}</h1>
+          <div style={countCard}>
+            <h3 style={countLabel}>Customers</h3>
+            <h1 style={countValue}>{data.customers}</h1>
           </div>
 
-          <div style={{ background: "#fff", padding: 20, borderRadius: 12, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ color: "#64748b", margin: 0 }}>Suppliers</h3>
-            <h1 style={{ color: "#1e293b", margin: "10px 0 0 0" }}>{data.suppliers}</h1>
+          <div style={countCard}>
+            <h3 style={countLabel}>Suppliers</h3>
+            <h1 style={countValue}>{data.suppliers}</h1>
           </div>
 
-          <div style={{ background: "#fff", padding: 20, borderRadius: 12, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ color: "#64748b", margin: 0 }}>Stock Items</h3>
-            <h1 style={{ color: "#1e293b", margin: "10px 0 0 0" }}>{data.stock}</h1>
+          <div style={countCard}>
+            <h3 style={countLabel}>Stock Items</h3>
+            <h1 style={countValue}>{data.stock}</h1>
           </div>
         </div>
 
-        {/* --- Visual Graphs Section --- */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-            gap: 30,
-            marginTop: 40,
-          }}
-        >
-          {/* Chart 1: Financial Bar Chart */}
-          <div style={{ background: "#fff", padding: 25, borderRadius: 15, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ marginBottom: 20, color: "#1e293b" }}>Financial Health (Money Value)</h3>
-            <div style={{ width: "100%", height: 300 }}>
-              <ResponsiveContainer>
+        {/* Charts */}
+        <div style={responsiveStyles.chartContainer}>
+          <div style={chartCard}>
+            <h3 style={chartTitle}>Financial Health (Money Value)</h3>
+            <div style={chartWrapper}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={financialData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" stroke="#64748b" />
-                  <YAxis tickFormatter={(val) => `₹${val}`} stroke="#64748b" />
+                  <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={(val) => `₹${val}`} stroke="#64748b" tick={{ fontSize: 12 }} />
                   <Tooltip content={renderCurrencyTooltip} />
                   <Bar dataKey="Amount" radius={[8, 8, 0, 0]}>
                     {financialData.map((entry, index) => {
-                      // Color code bars individually to match the UI cards
                       const colors = ["#2563eb", "#16a34a", data.profit >= 0 ? "#059669" : "#dc2626"];
                       return <Cell key={`cell-${index}`} fill={colors[index]} />;
                     })}
@@ -188,11 +158,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Chart 2: Operations Breakdown Pie Chart */}
-          <div style={{ background: "#fff", padding: 25, borderRadius: 15, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ marginBottom: 20, color: "#1e293b" }}>Business Operations Mix</h3>
-            <div style={{ width: "100%", height: 300 }}>
-              <ResponsiveContainer>
+          <div style={chartCard}>
+            <h3 style={chartTitle}>Business Operations Mix</h3>
+            <div style={chartWrapper}>
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={operationalData}
@@ -208,14 +177,176 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend iconType="circle" layout="horizontal" verticalAlign="bottom" align="center" />
+                  <Legend 
+                    iconType="circle" 
+                    layout="horizontal" 
+                    verticalAlign="bottom" 
+                    align="center"
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
-
       </div>
     </Layout>
   );
 }
+
+// Styles
+const dashboardTitle = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  marginBottom: "30px",
+  color: "#1e293b",
+  '@media (max-width: 768px)': {
+    fontSize: "22px",
+  },
+  '@media (max-width: 480px)': {
+    fontSize: "18px",
+  },
+};
+
+const kpiGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "25px",
+  marginBottom: "30px",
+  '@media (max-width: 768px)': {
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+  },
+  '@media (max-width: 480px)': {
+    gridTemplateColumns: "1fr",
+    gap: "12px",
+  },
+};
+
+const kpiLabel = {
+  margin: "0",
+  opacity: "0.9",
+  fontSize: "1rem",
+  fontWeight: "500",
+  '@media (max-width: 480px)': {
+    fontSize: "0.9rem",
+  },
+};
+
+const kpiValue = {
+  margin: "10px 0 0 0",
+  fontSize: "28px",
+  '@media (max-width: 768px)': {
+    fontSize: "22px",
+  },
+  '@media (max-width: 480px)': {
+    fontSize: "18px",
+  },
+};
+
+const countGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gap: "20px",
+  marginTop: "20px",
+  marginBottom: "30px",
+  '@media (max-width: 768px)': {
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+    gap: "15px",
+  },
+  '@media (max-width: 480px)': {
+    gridTemplateColumns: "1fr 1fr",
+    gap: "10px",
+  },
+};
+
+const countCard = {
+  background: "#fff",
+  padding: "20px",
+  borderRadius: "12px",
+  textAlign: "center",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  '@media (max-width: 768px)': {
+    padding: "15px",
+  },
+  '@media (max-width: 480px)': {
+    padding: "12px",
+  },
+};
+
+const countLabel = {
+  color: "#64748b",
+  margin: "0",
+  fontSize: "14px",
+  '@media (max-width: 480px)': {
+    fontSize: "12px",
+  },
+};
+
+const countValue = {
+  color: "#1e293b",
+  margin: "10px 0 0 0",
+  fontSize: "24px",
+  '@media (max-width: 768px)': {
+    fontSize: "20px",
+  },
+  '@media (max-width: 480px)': {
+    fontSize: "16px",
+  },
+};
+
+const chartCard = {
+  background: "#fff",
+  padding: "25px",
+  borderRadius: "15px",
+  boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+  width: "100%",
+  '@media (max-width: 768px)': {
+    padding: "20px",
+  },
+  '@media (max-width: 480px)': {
+    padding: "15px",
+  },
+};
+
+const chartTitle = {
+  marginBottom: "20px",
+  color: "#1e293b",
+  fontSize: "16px",
+  '@media (max-width: 768px)': {
+    fontSize: "14px",
+  },
+  '@media (max-width: 480px)': {
+    fontSize: "13px",
+  },
+};
+
+const chartWrapper = {
+  width: "100%",
+  height: "300px",
+  '@media (max-width: 768px)': {
+    height: "250px",
+  },
+  '@media (max-width: 480px)': {
+    height: "200px",
+  },
+};
+
+const tooltipContainer = {
+  backgroundColor: "#fff",
+  padding: "10px",
+  border: "1px solid #ccc",
+  borderRadius: "5px",
+};
+
+const tooltipTitle = {
+  margin: 0,
+  fontWeight: "bold",
+  fontSize: "13px",
+};
+
+const tooltipValue = {
+  margin: 0,
+  color: "#2563eb",
+  fontSize: "13px",
+};

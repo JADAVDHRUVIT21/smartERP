@@ -10,7 +10,6 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    // Validate inputs
     if (!username.trim() || !password.trim()) {
       toast.error("Please fill in all fields");
       return;
@@ -31,20 +30,17 @@ function Login() {
       const token = response.data.access_token;
       localStorage.setItem("token", token);
 
-      // Success toast
       toast.success("Login successful! Redirecting to dashboard...", {
         duration: 3000,
         position: "top-right",
       });
 
-      // Navigate after a small delay to show toast
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
     } catch (error) {
       console.error("Login failed:", error);
       
-      // Error toast
       toast.error(
         error.response?.data?.message || 
         error.response?.data?.detail || 
@@ -59,7 +55,6 @@ function Login() {
     }
   };
 
-  // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleLogin();
@@ -82,19 +77,11 @@ function Login() {
               background: "#22c55e",
               color: "#fff",
             },
-            iconTheme: {
-              primary: "#fff",
-              secondary: "#22c55e",
-            },
           },
           error: {
             style: {
               background: "#ef4444",
               color: "#fff",
-            },
-            iconTheme: {
-              primary: "#fff",
-              secondary: "#ef4444",
             },
           },
         }}
@@ -160,11 +147,25 @@ function Login() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @media (max-width: 480px) {
+          .login-card {
+            padding: 30px 20px !important;
+          }
+          .login-title {
+            font-size: 22px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
-// Styles
+// Styles with responsive adjustments
 const styles = {
   container: {
     display: "flex",
@@ -182,6 +183,9 @@ const styles = {
     maxWidth: "420px",
     boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
     transition: "transform 0.3s ease",
+    '@media (max-width: 480px)': {
+      padding: "30px 20px",
+    },
   },
   header: {
     textAlign: "center",
@@ -198,12 +202,18 @@ const styles = {
     color: "#1a202c",
     margin: "0",
     letterSpacing: "-0.5px",
+    '@media (max-width: 480px)': {
+      fontSize: "22px",
+    },
   },
   subtitle: {
     fontSize: "14px",
     color: "#718096",
     marginTop: "8px",
     marginBottom: "0",
+    '@media (max-width: 480px)': {
+      fontSize: "12px",
+    },
   },
   form: {
     display: "flex",
@@ -282,14 +292,5 @@ const styles = {
     textDecoration: "underline",
   },
 };
-
-// Add keyframes for spinner animation
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Login;

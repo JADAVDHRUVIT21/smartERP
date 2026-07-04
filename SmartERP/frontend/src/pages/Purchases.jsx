@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import toast, { Toaster } from "react-hot-toast";
+import { responsiveStyles } from "../styles/responsiveStyles";
 
 const API = "https://smarterp-1-6rfs.onrender.com/purchases/";
 
@@ -225,11 +226,9 @@ export default function Purchases() {
   };
 
   const deletePurchase = async (id) => {
-    // Professional Delete Confirmation Toast
     toast.custom((t) => (
-      <div style={deleteOverlay}>
-        <div style={deleteContainer}>
-          {/* Warning Icon */}
+      <div style={responsiveStyles.deleteOverlay}>
+        <div style={responsiveStyles.deleteContainer}>
           <div style={deleteIconWrapper}>
             <div style={deleteIconCircle}>
               <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +237,6 @@ export default function Purchases() {
             </div>
           </div>
 
-          {/* Content */}
           <div style={deleteContent}>
             <h3 style={deleteTitle}>Delete Purchase</h3>
             <p style={deleteMessage}>
@@ -246,8 +244,7 @@ export default function Purchases() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div style={deleteActions}>
+          <div style={responsiveStyles.deleteActions}>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
@@ -346,49 +343,49 @@ export default function Purchases() {
         }}
       />
 
-      <div style={page}>
-        <div style={card}>
-          <h1>Purchase Master</h1>
+      <div style={responsiveStyles.page}>
+        <div style={responsiveStyles.card}>
+          <h1 style={responsiveStyles.title}>Purchase Master</h1>
 
-          <div style={shortcutBar}>
+          <div style={responsiveStyles.shortcutBar}>
             <span>F1 Save Purchase</span>
             <span>F2 New</span>
             <span>F3 Update</span>
             <span>F4 Delete</span>
           </div>
 
-          <div style={grid}>
+          <div style={responsiveStyles.grid}>
             <input
-              placeholder="Enter Supplier Name"
+              placeholder="Enter Supplier Name *"
               name="supplierName"
               value={form.supplierName}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
-              placeholder="Enter Product Name"
+              placeholder="Enter Product Name *"
               name="productName"
               value={form.productName}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
               type="number"
-              placeholder="Enter Quantity"
+              placeholder="Enter Quantity *"
               name="quantity"
               value={form.quantity}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
-              placeholder="Enter Invoice Number"
+              placeholder="Enter Invoice Number *"
               name="invoiceNo"
               value={form.invoiceNo}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -396,16 +393,16 @@ export default function Purchases() {
               name="invoiceDate"
               value={form.invoiceDate}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
               type="number"
-              placeholder="Enter Purchase Price"
+              placeholder="Enter Purchase Price *"
               name="purchasePrice"
               value={form.purchasePrice}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -414,7 +411,7 @@ export default function Purchases() {
               name="gst"
               value={form.gst}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
@@ -423,87 +420,117 @@ export default function Purchases() {
               name="discount"
               value={form.discount}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
 
             <input
               type="number"
-              placeholder="Enter Total Amount"
+              placeholder="Enter Total Amount *"
               name="totalAmount"
               value={form.totalAmount}
               onChange={handleChange}
-              style={input}
+              style={responsiveStyles.input}
             />
           </div>
 
-          <button onClick={savePurchase} style={saveBtn} disabled={loading}>
-            {loading ? "Processing..." : editingId ? "Update Purchase" : "Save Purchase"}
-          </button>
+          <div style={responsiveStyles.buttonRow}>
+            <button 
+              onClick={savePurchase} 
+              style={{
+                ...responsiveStyles.saveBtn,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
+              }} 
+              disabled={loading}
+            >
+              {loading ? "Processing..." : editingId ? "Update Purchase" : "Save Purchase"}
+            </button>
 
-          <button onClick={clearForm} style={newBtn}>
-            New
-          </button>
+            <button onClick={clearForm} style={responsiveStyles.reloadBtn}>
+              New
+            </button>
+          </div>
 
-          <h2>Purchase List</h2>
+          <h2 style={responsiveStyles.h2}>Purchase List</h2>
 
           <input
             placeholder="Search Purchase"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={searchBox}
+            style={{
+              ...responsiveStyles.searchBox,
+              marginBottom: 20,
+            }}
           />
 
-          {loading && <p style={{ color: "#3b82f6" }}>Loading...</p>}
+          {loading && <p style={loadingText}>Loading...</p>}
 
-          <table style={table}>
-            <thead>
-              <tr style={thRow}>
-                <th style={{ borderRadius: "8px 0 0 8px" }}>ID</th>
-                <th style={{ textAlign: "left", paddingLeft: "20px" }}>Supplier</th>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Invoice</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th style={{ borderRadius: "0 8px 8px 0" }}>Action</th>
-              </tr>
-            </thead>
+          <div style={tableWrapper}>
+            <table style={responsiveStyles.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "8px 0 0 8px" }}>ID</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px", textAlign: "left", paddingLeft: "20px" }}>Supplier</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px" }}>Product</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "60px" }}>Qty</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Invoice</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Date</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Amount</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "0 8px 8px 0", minWidth: "130px" }}>Action</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {purchases
-                .filter(
-                  (p) =>
-                    p.supplier_name?.toLowerCase().includes(search.toLowerCase()) ||
-                    p.product_name?.toLowerCase().includes(search.toLowerCase())
-                )
-                .map((p) => (
-                  <tr
-                    key={p.id}
-                    onClick={() => setSelectedId(p.id)}
-                    style={{
-                      ...trStyle,
-                      background: selectedId === p.id ? "#dbeafe" : "white",
-                    }}
-                  >
-                    <td>{p.id}</td>
-                    <td style={{ textAlign: "left", paddingLeft: "20px" }}>{p.supplier_name}</td>
-                    <td>{p.product_name}</td>
-                    <td>{p.quantity}</td>
-                    <td>{p.invoice_no}</td>
-                    <td>{p.invoice_date}</td>
-                    <td style={{ fontWeight: "500" }}>₹ {p.total_amount}</td>
-                    <td>
-                      <button onClick={(e) => { e.stopPropagation(); editPurchase(p); }} style={editBtn}>
-                        Edit
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); deletePurchase(p.id); }} style={deleteBtn}>
-                        Delete
-                      </button>
+              <tbody>
+                {purchases
+                  .filter(
+                    (p) =>
+                      p.supplier_name?.toLowerCase().includes(search.toLowerCase()) ||
+                      p.product_name?.toLowerCase().includes(search.toLowerCase())
+                  )
+                  .map((p) => (
+                    <tr
+                      key={p.id}
+                      onClick={() => setSelectedId(p.id)}
+                      style={{
+                        ...responsiveStyles.row,
+                        background: selectedId === p.id ? "#dbeafe" : "white",
+                      }}
+                    >
+                      <td style={responsiveStyles.td}>{p.id}</td>
+                      <td style={{ ...responsiveStyles.td, textAlign: "left", paddingLeft: "20px" }}>{p.supplier_name}</td>
+                      <td style={responsiveStyles.td}>{p.product_name}</td>
+                      <td style={responsiveStyles.td}>{p.quantity}</td>
+                      <td style={responsiveStyles.td}>{p.invoice_no}</td>
+                      <td style={responsiveStyles.td}>{p.invoice_date}</td>
+                      <td style={{ ...responsiveStyles.td, fontWeight: "500" }}>₹ {p.total_amount}</td>
+                      <td style={responsiveStyles.td}>
+                        <div style={actionButtonGroup}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); editPurchase(p); }} 
+                            style={responsiveStyles.editBtn}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deletePurchase(p.id); }} 
+                            style={responsiveStyles.deleteBtn}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                {purchases.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={8} style={{ ...responsiveStyles.td, textAlign: "center", color: "#64748b" }}>
+                      No purchases found.
                     </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -549,31 +576,22 @@ export default function Purchases() {
         .animate-pulse {
           animation: pulse 1s ease-in-out infinite;
         }
+
+        @media (max-width: 768px) {
+          .action-buttons {
+            flex-direction: column;
+            gap: 4px;
+          }
+          .action-buttons button {
+            width: 100%;
+          }
+        }
       `}</style>
     </Layout>
   );
 }
 
 // Delete Toast Styles
-const deleteOverlay = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "100vh",
-  padding: "20px",
-};
-
-const deleteContainer = {
-  background: "white",
-  borderRadius: "16px",
-  padding: "32px",
-  width: "440px",
-  maxWidth: "95vw",
-  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
-  textAlign: "center",
-  animation: "fadeIn 0.25s ease-out",
-};
-
 const deleteIconWrapper = {
   display: "flex",
   justifyContent: "center",
@@ -615,12 +633,6 @@ const deleteMessage = {
   lineHeight: "1.6",
 };
 
-const deleteActions = {
-  display: "flex",
-  gap: "12px",
-  justifyContent: "center",
-};
-
 const deleteButton = {
   background: "#ef4444",
   color: "white",
@@ -647,111 +659,21 @@ const cancelButton = {
   minWidth: "120px",
 };
 
-// Styling definitions
-const page = {
-  background: "#f8fafc",
-  padding: 30,
-  minHeight: "100vh",
+const loadingText = {
+  color: "#3b82f6",
+  textAlign: "center",
+  padding: "20px",
 };
 
-const card = {
-  background: "#fff",
-  padding: 30,
-  borderRadius: 15,
-  boxShadow: "0 5px 20px rgba(0,0,0,.08)",
+const tableWrapper = {
+  overflowX: "auto",
+  marginTop: "20px",
+  WebkitOverflowScrolling: "touch",
 };
 
-const shortcutBar = {
-  background: "#0f172a",
-  color: "#fff",
-  padding: 15,
-  borderRadius: 10,
+const actionButtonGroup = {
   display: "flex",
-  gap: 30,
-  fontWeight: "bold",
-};
-
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-  gap: 15,
-  marginTop: 25,
-};
-
-const input = {
-  padding: 12,
-  border: "1px solid #cbd5e1",
-  borderRadius: 8,
-};
-
-const searchBox = {
-  ...input,
-  marginTop: 20,
-  width: 250,
-};
-
-const saveBtn = {
-  background: "#16a34a",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginTop: 25,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const newBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginLeft: 10,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const table = {
-  width: "100%",
-  marginTop: 25,
-  borderCollapse: "collapse",
-  fontSize: "14px",
-  color: "#334155",
-};
-
-const thRow = {
-  background: "#0f172a",
-  color: "#fff",
-  textAlign: "center",
-  height: "50px",
-};
-
-const trStyle = {
-  textAlign: "center",
-  borderBottom: "1px solid #f1f5f9",
-  height: "60px",
-  cursor: "pointer",
-  transition: "background 0.2s ease",
-};
-
-const editBtn = {
-  background: "#f59e0b",
-  color: "#fff",
-  border: 0,
-  padding: "6px 16px",
-  borderRadius: "6px",
-  fontWeight: "500",
-  cursor: "pointer",
-};
-
-const deleteBtn = {
-  background: "#dc2626",
-  color: "#fff",
-  border: 0,
-  padding: "6px 16px",
-  borderRadius: "6px",
-  fontWeight: "500",
-  marginLeft: 8,
-  cursor: "pointer",
+  gap: "8px",
+  justifyContent: "center",
+  flexWrap: "wrap",
 };

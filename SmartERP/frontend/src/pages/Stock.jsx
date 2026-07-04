@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Layout from "../components/Layout";
 import API from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
+import { responsiveStyles } from "../styles/responsiveStyles";
 
 export default function Stock() {
   const [stocks, setStocks] = useState([]);
@@ -48,10 +49,6 @@ export default function Stock() {
       setLoading(true);
 
       const res = await API.get("/stock/");
-      console.log("API base url:", import.meta.env.VITE_API_URL);
-
-      console.log("Response:", res);
-      console.log("Is Array:", Array.isArray(res.data));
 
       let data = [];
 
@@ -110,8 +107,6 @@ export default function Stock() {
         ?.toLowerCase()
         .includes(search.toLowerCase())
     );
-    console.log("Search Result:", result);
-    console.log("stocks:", stocks);
     setFilteredStocks(result);
     
     if (result.length === 0) {
@@ -182,18 +177,18 @@ export default function Stock() {
         }}
       />
 
-      <div style={page}>
-        <div style={card}>
-          <h1>Stock Master</h1>
+      <div style={responsiveStyles.page}>
+        <div style={responsiveStyles.card}>
+          <h1 style={responsiveStyles.title}>Stock Master</h1>
 
-          <div style={shortcutBar}>
+          <div style={responsiveStyles.shortcutBar}>
             <span>F1 Refresh</span>
             <span>F2 Focus Search</span>
             <span>F3 Search</span>
             <span>F4 Reset</span>
           </div>
 
-          <div style={header}>
+          <div style={headerContainer}>
             <input
               ref={searchRef}
               type="text"
@@ -205,13 +200,19 @@ export default function Stock() {
                   handleSearch();
                 }
               }}
-              style={searchBox}
+              style={{
+                ...responsiveStyles.searchBox,
+                maxWidth: "100%",
+              }}
             />
 
             <div style={buttonGroup}>
               <button
                 onClick={handleSearch}
-                style={searchBtn}
+                style={{
+                  ...responsiveStyles.saveBtn,
+                  padding: "10px 20px",
+                }}
                 disabled={loading}
               >
                 Search
@@ -219,7 +220,10 @@ export default function Stock() {
 
               <button
                 onClick={handleRefresh}
-                style={refreshBtn}
+                style={{
+                  ...responsiveStyles.reloadBtn,
+                  padding: "10px 20px",
+                }}
                 disabled={loading}
               >
                 Refresh
@@ -227,80 +231,52 @@ export default function Stock() {
             </div>
           </div>
 
-          {loading && (
-            <p style={{ textAlign: "center", color: "#3b82f6", margin: "20px 0" }}>
-              Loading stock data...
-            </p>
-          )}
+          {loading && <p style={loadingText}>Loading stock data...</p>}
 
-          <div style={tableContainer}>
-            <table style={table}>
+          <div style={tableWrapper}>
+            <table style={responsiveStyles.table}>
               <thead>
                 <tr>
-                  <th style={{ ...th, borderRadius: "8px 0 0 8px" }}>ID</th>
-                  <th style={{ ...th, textAlign: "left", paddingLeft: "20px" }}>Product</th>
-                  <th style={th}>Purchase Qty</th>
-                  <th style={th}>Sale Qty</th>
-                  <th style={th}>Available Qty</th>
-                  <th style={{ ...th, borderRadius: "0 8px 8px 0" }}>Status</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "8px 0 0 8px" }}>ID</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "150px", textAlign: "left", paddingLeft: "20px" }}>Product</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "80px" }}>Purchase Qty</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "80px" }}>Sale Qty</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "80px" }}>Available Qty</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "0 8px 8px 0", minWidth: "100px" }}>Status</th>
                 </tr>
               </thead>
 
               <tbody>
                 {filteredStocks.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      style={td}
-                    >
+                    <td colSpan={6} style={responsiveStyles.td}>
                       {loading ? "Loading..." : "No Stock Found"}
                     </td>
                   </tr>
                 ) : (
                   filteredStocks.map((item) => (
-                    <tr
-                      key={item.id}
-                      style={row}
-                    >
-                      <td style={td}>{item.id}</td>
-
-                      <td style={{ ...td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
+                    <tr key={item.id} style={responsiveStyles.row}>
+                      <td style={responsiveStyles.td}>{item.id}</td>
+                      <td style={{ ...responsiveStyles.td, textAlign: "left", paddingLeft: "20px", fontWeight: "500" }}>
                         {item.product_name}
                       </td>
-
-                      <td style={td}>{item.purchase_qty}</td>
-
-                      <td style={td}>{item.sale_qty}</td>
-
-                      <td
-                        style={{
-                          ...td,
-                          fontWeight: "bold",
-                          fontSize: "16px",
-                          color:
-                            item.available_qty > 10
-                              ? "#16a34a"
-                              : item.available_qty > 0
-                                ? "#f59e0b"
-                                : "#dc2626",
-                        }}
-                      >
+                      <td style={responsiveStyles.td}>{item.purchase_qty}</td>
+                      <td style={responsiveStyles.td}>{item.sale_qty}</td>
+                      <td style={{ 
+                        ...responsiveStyles.td, 
+                        fontWeight: "bold", 
+                        fontSize: "16px",
+                        color: item.available_qty > 10 ? "#16a34a" : item.available_qty > 0 ? "#f59e0b" : "#dc2626",
+                      }}>
                         {item.available_qty}
                       </td>
-
-                      <td style={td}>
+                      <td style={responsiveStyles.td}>
                         {item.available_qty > 10 ? (
-                          <span style={green}>
-                             In Stock
-                          </span>
+                          <span style={statusGreen}>✅ In Stock</span>
                         ) : item.available_qty > 0 ? (
-                          <span style={orange}>
-                             Low Stock
-                          </span>
+                          <span style={statusOrange}>⚠️ Low Stock</span>
                         ) : (
-                          <span style={red}>
-                             Out of Stock
-                          </span>
+                          <span style={statusRed}>❌ Out of Stock</span>
                         )}
                       </td>
                     </tr>
@@ -311,7 +287,7 @@ export default function Stock() {
           </div>
 
           {!loading && filteredStocks.length > 0 && (
-            <div style={summary}>
+            <div style={responsiveStyles.summary}>
               <span>Total Products: <strong>{filteredStocks.length}</strong></span>
               <span style={summaryDivider}>|</span>
               <span>
@@ -339,152 +315,65 @@ export default function Stock() {
   );
 }
 
-const page = {
-  background: "#f8fafc",
-  padding: 30,
-  minHeight: "100vh",
-};
-
-const card = {
-  background: "#fff",
-  padding: 30,
-  borderRadius: 15,
-  boxShadow: "0 5px 20px rgba(0,0,0,.08)",
-};
-
-const shortcutBar = {
-  background: "#0f172a",
-  color: "#fff",
-  padding: 15,
-  borderRadius: 10,
-  display: "flex",
-  gap: 30,
-  fontWeight: "bold",
-  flexWrap: "wrap",
-  marginBottom: 20
-};
-
-const header = {
+const headerContainer = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  marginTop: 25,
-  marginBottom: 20,
-  gap: 10,
+  marginTop: "25px",
+  marginBottom: "20px",
+  gap: "10px",
   flexWrap: "wrap",
-};
-
-const searchBox = {
-  padding: 12,
-  width: 320,
-  borderRadius: 8,
-  border: "1px solid #d1d5db",
-  fontSize: "14px",
-  outline: "none",
-  transition: "border-color 0.2s"
+  width: "100%",
 };
 
 const buttonGroup = {
   display: "flex",
-  gap: 10,
+  gap: "10px",
+  flexWrap: "wrap",
 };
 
-const searchBtn = {
-  background: "#16a34a",
-  color: "#fff",
-  border: "none",
-  padding: "12px 22px",
-  borderRadius: 8,
-  cursor: "pointer",
-  fontWeight: "500",
-  transition: "background 0.2s"
+const loadingText = {
+  color: "#3b82f6",
+  textAlign: "center",
+  padding: "20px",
 };
 
-const refreshBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: "none",
-  padding: "12px 22px",
-  borderRadius: 8,
-  cursor: "pointer",
-  fontWeight: "500",
-  transition: "background 0.2s"
-};
-
-const tableContainer = {
+const tableWrapper = {
   overflowX: "auto",
-  marginTop: 20
+  marginTop: "20px",
+  WebkitOverflowScrolling: "touch",
 };
 
-const table = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "14px"
-};
-
-const th = {
-  padding: "14px 16px",
-  background: "#1e293b",
-  color: "#fff",
-  textAlign: "center",
-  fontWeight: "600"
-};
-
-const td = {
-  padding: "14px 16px",
-  textAlign: "center",
-  borderBottom: "1px solid #e5e7eb",
-  verticalAlign: "middle"
-};
-
-const row = {
-  textAlign: "center",
-  transition: "background 0.2s",
-  cursor: "default"
-};
-
-const green = {
+const statusGreen = {
   background: "#16a34a",
   color: "#fff",
   padding: "5px 14px",
-  borderRadius: 20,
+  borderRadius: "20px",
   fontSize: "13px",
   fontWeight: "500",
-  display: "inline-block"
+  display: "inline-block",
 };
 
-const orange = {
+const statusOrange = {
   background: "#f59e0b",
   color: "#fff",
   padding: "5px 14px",
-  borderRadius: 20,
+  borderRadius: "20px",
   fontSize: "13px",
   fontWeight: "500",
-  display: "inline-block"
+  display: "inline-block",
 };
 
-const red = {
+const statusRed = {
   background: "#dc2626",
   color: "#fff",
   padding: "5px 14px",
-  borderRadius: 20,
+  borderRadius: "20px",
   fontSize: "13px",
   fontWeight: "500",
-  display: "inline-block"
-};
-
-const summary = {
-  display: "flex",
-  justifyContent: "center",
-  gap: "20px",
-  marginTop: "25px",
-  padding: "15px",
-  background: "#f8fafc",
-  borderRadius: "10px",
-  fontSize: "14px",
-  flexWrap: "wrap"
+  display: "inline-block",
 };
 
 const summaryDivider = {
-  color: "#cbd5e1"
+  color: "#cbd5e1",
 };

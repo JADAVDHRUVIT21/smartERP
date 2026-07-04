@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import toast, { Toaster } from "react-hot-toast";
+import { responsiveStyles } from "../styles/responsiveStyles";
 
 const API = "https://smarterp-1-6rfs.onrender.com/products/";
 
@@ -118,6 +119,14 @@ export default function Products() {
     setForm(initialFormState);
     setEditingId(null);
     setSelectedId(null);
+    toast.success("Form cleared successfully!", {
+      position: "top-right",
+      duration: 2000,
+      style: {
+        background: "#22c55e",
+        color: "#fff"
+      }
+    });
   };
 
   const saveProduct = async () => {
@@ -212,11 +221,9 @@ export default function Products() {
   };
 
   const deleteProduct = async (id) => {
-    // Professional Delete Confirmation Toast
     toast.custom((t) => (
-      <div style={deleteOverlay}>
-        <div style={deleteContainer}>
-          {/* Warning Icon */}
+      <div style={responsiveStyles.deleteOverlay}>
+        <div style={responsiveStyles.deleteContainer}>
           <div style={deleteIconWrapper}>
             <div style={deleteIconCircle}>
               <svg style={deleteIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +232,6 @@ export default function Products() {
             </div>
           </div>
 
-          {/* Content */}
           <div style={deleteContent}>
             <h3 style={deleteTitle}>Delete Product</h3>
             <p style={deleteMessage}>
@@ -233,8 +239,7 @@ export default function Products() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div style={deleteActions}>
+          <div style={responsiveStyles.deleteActions}>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
@@ -333,21 +338,21 @@ export default function Products() {
         }}
       />
 
-      <div style={page}>
-        <div style={card}>
-          <h1>Product Master</h1>
+      <div style={responsiveStyles.page}>
+        <div style={responsiveStyles.card}>
+          <h1 style={responsiveStyles.title}>Product Master</h1>
 
-          <div style={shortcutBar}>
+          <div style={responsiveStyles.shortcutBar}>
             <span>F1 Save Product</span>
             <span>F2 New Product</span>
             <span>F3 Update Product</span>
             <span>F4 Delete Product</span>
           </div>
 
-          <div style={grid}>
+          <div style={responsiveStyles.grid}>
             {[
-              ["product_name", "Enter Product Name"],
-              ["product_code", "Enter Product Code"],
+              ["product_name", "Enter Product Name *"],
+              ["product_code", "Enter Product Code *"],
               ["barcode", "Enter Barcode"],
               ["category", "Enter Category"],
               ["brand", "Enter Brand"],
@@ -361,7 +366,7 @@ export default function Products() {
                 placeholder={placeholder}
                 value={form[name]}
                 onChange={handleChange}
-                style={inputStyle}
+                style={responsiveStyles.input}
               />
             ))}
 
@@ -371,14 +376,14 @@ export default function Products() {
               placeholder="Enter GST Percentage"
               value={form.gst}
               onChange={handleChange}
-              style={inputStyle}
+              style={responsiveStyles.input}
             />
 
             <select
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              style={inputStyle}
+              style={responsiveStyles.input}
             >
               <option value="PCS">PCS</option>
               <option value="KG">KG</option>
@@ -400,84 +405,108 @@ export default function Products() {
                 placeholder={placeholder}
                 value={form[name]}
                 onChange={handleChange}
-                style={inputStyle}
+                style={responsiveStyles.input}
               />
             ))}
           </div>
 
-          <button onClick={saveProduct} style={saveBtn} disabled={loading}>
-            {loading ? "Processing..." : editingId ? "Update Product" : "Save Product"}
-          </button>
+          <div style={responsiveStyles.buttonRow}>
+            <button 
+              onClick={saveProduct} 
+              style={{
+                ...responsiveStyles.saveBtn,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
+              }} 
+              disabled={loading}
+            >
+              {loading ? "Processing..." : editingId ? "Update Product" : "Save Product"}
+            </button>
 
-          <button onClick={clearForm} style={newBtn}>
-            New
-          </button>
+            <button onClick={clearForm} style={responsiveStyles.reloadBtn}>
+              New
+            </button>
+          </div>
 
-          <h2 style={{ marginTop: 40 }}>Product List</h2>
+          <h2 style={responsiveStyles.h2}>Product List</h2>
 
           <input
             placeholder="Search Product"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={searchInput}
+            style={{
+              ...responsiveStyles.searchBox,
+              marginBottom: 20,
+            }}
           />
 
-          {loading && <p style={{ color: "#3b82f6" }}>Loading...</p>}
+          {loading && <p style={loadingText}>Loading...</p>}
 
-          <table style={table}>
-            <thead>
-              <tr>
-                <th style={{ ...thStyle, borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }}>ID</th>
-                <th style={thStyle}>Name</th>
-                <th style={thStyle}>Code</th>
-                <th style={thStyle}>Stock</th>
-                <th style={{ ...thStyle, borderTopRightRadius: "8px", borderBottomRightRadius: "8px" }}>Action</th>
-              </tr>
-            </thead>
+          <div style={tableWrapper}>
+            <table style={responsiveStyles.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "8px 0 0 8px" }}>ID</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "120px" }}>Name</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "100px" }}>Code</th>
+                  <th style={{ ...responsiveStyles.th, minWidth: "80px" }}>Stock</th>
+                  <th style={{ ...responsiveStyles.th, borderRadius: "0 8px 8px 0", minWidth: "130px" }}>Action</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {products
-                .filter((item) =>
-                  item.name?.toLowerCase().includes(searchText.toLowerCase())
-                )
-                .map((item) => (
-                  <tr
-                    key={item.id}
-                    onClick={() => setSelectedId(item.id)}
-                    style={{
-                      ...trStyle,
-                      background: selectedId === item.id ? "#e0f2fe" : "transparent"
-                    }}
-                  >
-                    <td style={tdStyle}>{item.id}</td>
-                    <td style={tdStyle}>{item.name}</td>
-                    <td style={tdStyle}>{item.product_code || "—"}</td>
-                    <td style={tdStyle}>{item.stock_quantity ?? 0}</td>
-                    <td style={tdStyle}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          editProduct(item);
-                        }}
-                        style={editBtn}
-                      >
-                        Edit
-                      </button>
+              <tbody>
+                {products
+                  .filter((item) =>
+                    item.name?.toLowerCase().includes(searchText.toLowerCase())
+                  )
+                  .map((item) => (
+                    <tr
+                      key={item.id}
+                      onClick={() => setSelectedId(item.id)}
+                      style={{
+                        ...responsiveStyles.row,
+                        background: selectedId === item.id ? "#e0f2fe" : "transparent"
+                      }}
+                    >
+                      <td style={responsiveStyles.td}>{item.id}</td>
+                      <td style={responsiveStyles.td}>{item.name}</td>
+                      <td style={responsiveStyles.td}>{item.product_code || "—"}</td>
+                      <td style={responsiveStyles.td}>{item.stock_quantity ?? 0}</td>
+                      <td style={responsiveStyles.td}>
+                        <div style={actionButtonGroup}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              editProduct(item);
+                            }}
+                            style={responsiveStyles.editBtn}
+                          >
+                            Edit
+                          </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteProduct(item.id);
-                        }}
-                        style={deleteBtn}
-                      >
-                        Delete
-                      </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteProduct(item.id);
+                            }}
+                            style={responsiveStyles.deleteBtn}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                {products.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={5} style={{ ...responsiveStyles.td, textAlign: "center", color: "#64748b" }}>
+                      No products found.
                     </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -523,31 +552,22 @@ export default function Products() {
         .animate-pulse {
           animation: pulse 1s ease-in-out infinite;
         }
+
+        @media (max-width: 768px) {
+          .action-buttons {
+            flex-direction: column;
+            gap: 4px;
+          }
+          .action-buttons button {
+            width: 100%;
+          }
+        }
       `}</style>
     </Layout>
   );
 }
 
 // Delete Toast Styles
-const deleteOverlay = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "100vh",
-  padding: "20px",
-};
-
-const deleteContainer = {
-  background: "white",
-  borderRadius: "16px",
-  padding: "32px",
-  width: "440px",
-  maxWidth: "95vw",
-  boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
-  textAlign: "center",
-  animation: "fadeIn 0.25s ease-out",
-};
-
 const deleteIconWrapper = {
   display: "flex",
   justifyContent: "center",
@@ -589,12 +609,6 @@ const deleteMessage = {
   lineHeight: "1.6",
 };
 
-const deleteActions = {
-  display: "flex",
-  gap: "12px",
-  justifyContent: "center",
-};
-
 const deleteButton = {
   background: "#ef4444",
   color: "white",
@@ -621,119 +635,21 @@ const cancelButton = {
   minWidth: "120px",
 };
 
-// Layout & UI Component Styles
-const page = {
-  background: "#f8fafc",
-  padding: 30,
-  minHeight: "100vh"
+const loadingText = {
+  color: "#3b82f6",
+  textAlign: "center",
+  padding: "20px",
 };
 
-const card = {
-  background: "#fff",
-  padding: 30,
-  borderRadius: 15,
-  boxShadow: "0 5px 20px rgba(0,0,0,.08)"
+const tableWrapper = {
+  overflowX: "auto",
+  marginTop: "20px",
+  WebkitOverflowScrolling: "touch",
 };
 
-const shortcutBar = {
-  background: "#0f172a",
-  color: "#fff",
-  padding: 15,
-  borderRadius: 10,
+const actionButtonGroup = {
   display: "flex",
-  gap: 30,
-  fontWeight: "bold",
-  marginBottom: 20
-};
-
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 15,
-  marginTop: 25
-};
-
-const inputStyle = {
-  padding: 12,
-  border: "1px solid #cbd5e1",
-  borderRadius: 8,
-  fontSize: "14px"
-};
-
-const searchInput = {
-  ...inputStyle,
-  width: 250,
-  marginTop: 20,
-  marginBottom: 20
-};
-
-const saveBtn = {
-  background: "#16a34a",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginTop: 25,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const newBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: 0,
-  padding: "12px 25px",
-  borderRadius: 8,
-  marginLeft: 10,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const editBtn = {
-  background: "#f59e0b",
-  color: "#fff",
-  border: 0,
-  padding: "6px 14px",
-  borderRadius: 6,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const deleteBtn = {
-  background: "#dc2626",
-  color: "#fff",
-  border: 0,
-  padding: "6px 14px",
-  borderRadius: 6,
-  marginLeft: 8,
-  cursor: "pointer",
-  fontWeight: "500"
-};
-
-const table = {
-  width: "100%",
-  marginTop: 20,
-  borderCollapse: "collapse",
-  textAlign: "left"
-};
-
-const thStyle = {
-  background: "#0f172a",
-  color: "#fff",
-  padding: "14px 16px",
-  fontWeight: "600",
-  fontSize: "14px"
-};
-
-const trStyle = {
-  borderBottom: "1px solid #f1f5f9",
-  cursor: "pointer",
-  transition: "background 0.15s ease-in-out"
-};
-
-const tdStyle = {
-  padding: "14px 16px",
-  color: "#334155",
-  fontSize: "14px",
-  verticalAlign: "middle"
+  gap: "8px",
+  justifyContent: "center",
+  flexWrap: "wrap",
 };
