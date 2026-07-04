@@ -50,7 +50,6 @@ export default function Layout({ children, title }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle logout with confirmation
   const handleLogout = () => {
     toast.custom((t) => (
       <div style={confirmOverlay}>
@@ -75,24 +74,12 @@ export default function Layout({ children, title }) {
                 performLogout();
               }}
               style={confirmYesButton}
-              onMouseEnter={(e) => {
-                e.target.style.background = "#dc2626";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "#ef4444";
-              }}
             >
               Yes, Logout
             </button>
             <button
               onClick={() => toast.dismiss(t.id)}
               style={confirmNoButton}
-              onMouseEnter={(e) => {
-                e.target.style.background = "#f3f4f6";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "transparent";
-              }}
             >
               Cancel
             </button>
@@ -105,7 +92,6 @@ export default function Layout({ children, title }) {
     });
   };
 
-  // Perform actual logout
   const performLogout = () => {
     localStorage.clear();
     
@@ -129,7 +115,6 @@ export default function Layout({ children, title }) {
     }, 1500);
   };
 
-  // All menu items - flat structure
   const menuItems = [
     { title: "Dashboard", path: "/dashboard" },
     { title: "Products", path: "/products" },
@@ -180,7 +165,6 @@ export default function Layout({ children, title }) {
         }}
       />
 
-      {/* Mobile Overlay */}
       {sidebarOpen && isMobile && (
         <div 
           style={styles.overlay}
@@ -188,13 +172,11 @@ export default function Layout({ children, title }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
         transform: !isMobile ? 'none' : (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)'),
         width: isMobile ? '280px' : '250px',
       }}>
-        {/* Logo */}
         <div style={styles.logoContainer}>
           <div style={styles.logo}>
             <span style={styles.logoText}>SmartERP</span>
@@ -209,7 +191,6 @@ export default function Layout({ children, title }) {
           )}
         </div>
 
-        {/* Navigation */}
         <nav style={styles.nav}>
           {menuItems.map((item, index) => {
             const isItemActive = isActive(item.path);
@@ -233,24 +214,29 @@ export default function Layout({ children, title }) {
           })}
         </nav>
 
-        {/* Logout Button - Simple, matching other menu items */}
         <div style={styles.logoutContainer}>
           <button 
             onClick={handleLogout}
             style={styles.logoutBtn}
+            onMouseEnter={(e) => {
+              e.target.style.background = "#dc2626";
+              e.target.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "transparent";
+              e.target.style.color = "#94a3b8";
+            }}
           >
             <span style={styles.menuText}>Logout</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main style={{
         ...styles.main,
         marginLeft: !isMobile ? '250px' : '0',
         paddingTop: '70px',
       }}>
-        {/* Navbar */}
         <header style={{
           ...styles.navbar,
           left: !isMobile ? '250px' : '0',
@@ -260,7 +246,6 @@ export default function Layout({ children, title }) {
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 style={styles.hamburger}
-                aria-label="Toggle sidebar"
               >
                 ☰
               </button>
@@ -275,7 +260,6 @@ export default function Layout({ children, title }) {
           </div>
         </header>
 
-        {/* Page Content */}
         <div style={styles.content}>
           {children}
         </div>
@@ -313,24 +297,48 @@ export default function Layout({ children, title }) {
             overflow: hidden;
           }
           .page-title {
-            font-size: 16px !important;
+            font-size: 14px !important;
           }
           .datetime-text {
-            font-size: 11px !important;
+            font-size: 10px !important;
           }
           .admin-text {
-            font-size: 12px !important;
+            font-size: 11px !important;
+          }
+          .navbar {
+            padding: 10px 15px !important;
+            height: 56px !important;
+          }
+          .content {
+            padding: 12px !important;
           }
         }
         @media (max-width: 480px) {
           .page-title {
-            font-size: 14px !important;
+            font-size: 13px !important;
           }
           .sidebar {
             width: 260px !important;
           }
           .datetime-text {
             display: none !important;
+          }
+          .admin-text {
+            font-size: 12px !important;
+          }
+          .hamburger {
+            font-size: 20px !important;
+            padding: 4px !important;
+          }
+          .navbar {
+            padding: 8px 12px !important;
+            height: 50px !important;
+          }
+          .content {
+            padding: 8px !important;
+          }
+          .user-container {
+            gap: 0px !important;
           }
         }
         @media print {
@@ -355,10 +363,9 @@ export default function Layout({ children, title }) {
         }
         .datetime-text {
           color: #64748b;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 400;
         }
-        /* Logout hover effect */
         .logout-btn:hover {
           background-color: #dc2626;
           color: #ffffff;
@@ -527,6 +534,8 @@ const styles = {
     flex: 1,
     padding: '10px 0',
     overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   },
   menuLink: {
     display: 'flex',
@@ -549,9 +558,10 @@ const styles = {
     whiteSpace: 'nowrap',
   },
   logoutContainer: {
-    padding: '16px 20px',
+    padding: '8px 20px 16px 20px',
     borderTop: '1px solid #1e293b',
     flexShrink: 0,
+    marginTop: 'auto',
   },
   logoutBtn: {
     display: 'flex',
@@ -590,7 +600,8 @@ const styles = {
   navbarLeft: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '12px',
+    minWidth: 0,
   },
   hamburger: {
     background: 'none',
@@ -610,10 +621,14 @@ const styles = {
     fontWeight: '600',
     color: '#0f172a',
     margin: 0,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   navbarRight: {
     display: 'flex',
     alignItems: 'center',
+    flexShrink: 0,
   },
   userContainer: {
     display: 'flex',
@@ -628,7 +643,7 @@ const styles = {
   },
   dateTimeText: {
     color: '#64748b',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '400',
   },
   content: {
@@ -636,5 +651,6 @@ const styles = {
     maxWidth: '1400px',
     margin: '0 auto',
     width: '100%',
+    boxSizing: 'border-box',
   },
 };
