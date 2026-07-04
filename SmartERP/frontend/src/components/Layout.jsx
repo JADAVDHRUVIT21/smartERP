@@ -172,6 +172,7 @@ export default function Layout({ children, title }) {
         />
       )}
 
+      {/* Sidebar - Fixed */}
       <aside style={{
         ...styles.sidebar,
         transform: !isMobile ? 'none' : (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)'),
@@ -191,28 +192,30 @@ export default function Layout({ children, title }) {
           )}
         </div>
 
-        <nav style={styles.nav}>
-          {menuItems.map((item, index) => {
-            const isItemActive = isActive(item.path);
-            return (
-              <Link
-                key={index}
-                to={item.path}
-                style={{
-                  ...styles.menuLink,
-                  ...(isItemActive ? styles.menuLinkActive : {})
-                }}
-                onClick={() => {
-                  if (isMobile) {
-                    setSidebarOpen(false);
-                  }
-                }}
-              >
-                <span style={styles.menuText}>{item.title}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <div style={styles.menuScrollArea}>
+          <nav style={styles.nav}>
+            {menuItems.map((item, index) => {
+              const isItemActive = isActive(item.path);
+              return (
+                <Link
+                  key={index}
+                  to={item.path}
+                  style={{
+                    ...styles.menuLink,
+                    ...(isItemActive ? styles.menuLinkActive : {})
+                  }}
+                  onClick={() => {
+                    if (isMobile) {
+                      setSidebarOpen(false);
+                    }
+                  }}
+                >
+                  <span style={styles.menuText}>{item.title}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
         <div style={styles.logoutContainer}>
           <button 
@@ -232,13 +235,15 @@ export default function Layout({ children, title }) {
         </div>
       </aside>
 
-      <main style={{
-        ...styles.main,
+      {/* Main Content Area */}
+      <div style={{
+        ...styles.mainWrapper,
         marginLeft: !isMobile ? '250px' : '0',
-        paddingTop: '70px',
       }}>
+        {/* Navbar - Fixed */}
         <header style={{
           ...styles.navbar,
+          width: !isMobile ? 'calc(100% - 250px)' : '100%',
           left: !isMobile ? '250px' : '0',
         }}>
           <div style={styles.navbarLeft}>
@@ -260,10 +265,13 @@ export default function Layout({ children, title }) {
           </div>
         </header>
 
-        <div style={styles.content}>
-          {children}
+        {/* Content - Only this scrolls */}
+        <div style={styles.contentWrapper}>
+          <div style={styles.content}>
+            {children}
+          </div>
         </div>
-      </main>
+      </div>
 
       <style>{`
         @keyframes fadeIn {
@@ -312,6 +320,25 @@ export default function Layout({ children, title }) {
           .content {
             padding: 12px !important;
           }
+          .logout-container {
+            padding: 6px 15px 10px 15px !important;
+          }
+          .logout-btn {
+            padding: 8px 16px !important;
+            font-size: 13px !important;
+            margin: 0 5px !important;
+          }
+          .menu-link {
+            padding: 10px 16px !important;
+            font-size: 13px !important;
+            margin: 1px 8px !important;
+          }
+          .logo-text {
+            font-size: 18px !important;
+          }
+          .logo-container {
+            padding: 14px 16px !important;
+          }
         }
         @media (max-width: 480px) {
           .page-title {
@@ -340,14 +367,32 @@ export default function Layout({ children, title }) {
           .user-container {
             gap: 0px !important;
           }
+          .logout-container {
+            padding: 4px 12px 8px 12px !important;
+          }
+          .logout-btn {
+            padding: 6px 14px !important;
+            font-size: 13px !important;
+            margin: 0 4px !important;
+          }
+          .menu-link {
+            padding: 8px 14px !important;
+            font-size: 13px !important;
+            margin: 1px 6px !important;
+          }
+          .logo-text {
+            font-size: 17px !important;
+          }
+          .logo-container {
+            padding: 12px 14px !important;
+          }
         }
         @media print {
           .sidebar, .navbar {
             display: none !important;
           }
-          .main-content {
+          .main-wrapper {
             margin-left: 0 !important;
-            padding-top: 0 !important;
           }
         }
         .user-container {
@@ -370,6 +415,34 @@ export default function Layout({ children, title }) {
           background-color: #dc2626;
           color: #ffffff;
           border-radius: 8px;
+        }
+        /* Scrollbar styling for menu area */
+        .menu-scroll-area::-webkit-scrollbar {
+          width: 3px;
+        }
+        .menu-scroll-area::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .menu-scroll-area::-webkit-scrollbar-thumb {
+          background: #1e293b;
+          border-radius: 4px;
+        }
+        .menu-scroll-area::-webkit-scrollbar-thumb:hover {
+          background: #334155;
+        }
+        /* Content scrollbar styling */
+        .content-wrapper::-webkit-scrollbar {
+          width: 6px;
+        }
+        .content-wrapper::-webkit-scrollbar-track {
+          background: #f1f5f9;
+        }
+        .content-wrapper::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        .content-wrapper::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
         }
       `}</style>
     </div>
@@ -496,7 +569,7 @@ const styles = {
     flexDirection: 'column',
     zIndex: 1000,
     transition: 'transform 0.3s ease',
-    overflowY: 'auto',
+    overflow: 'hidden',
     boxShadow: '2px 0 10px rgba(0,0,0,0.2)',
   },
   logoContainer: {
@@ -530,12 +603,16 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  nav: {
+  menuScrollArea: {
     flex: 1,
-    padding: '10px 0',
     overflowY: 'auto',
+    padding: '8px 0',
+    minHeight: 0,
+  },
+  nav: {
     display: 'flex',
     flexDirection: 'column',
+    gap: '1px',
   },
   menuLink: {
     display: 'flex',
@@ -546,7 +623,7 @@ const styles = {
     fontSize: '15px',
     transition: 'all 0.2s',
     borderRadius: '8px',
-    margin: '2px 10px',
+    margin: '0 10px',
     cursor: 'pointer',
   },
   menuLinkActive: {
@@ -558,10 +635,10 @@ const styles = {
     whiteSpace: 'nowrap',
   },
   logoutContainer: {
-    padding: '8px 20px 16px 20px',
+    padding: '8px 20px 14px 20px',
     borderTop: '1px solid #1e293b',
     flexShrink: 0,
-    marginTop: 'auto',
+    backgroundColor: '#0f172a',
   },
   logoutBtn: {
     display: 'flex',
@@ -575,13 +652,16 @@ const styles = {
     fontSize: '15px',
     borderRadius: '8px',
     transition: 'all 0.2s',
-    margin: '2px 10px',
+    margin: '0 10px',
   },
-  main: {
+  mainWrapper: {
     flex: 1,
     minHeight: '100vh',
-    transition: 'margin-left 0.3s ease',
+    display: 'flex',
+    flexDirection: 'column',
     width: '100%',
+    position: 'relative',
+    transition: 'margin-left 0.3s ease',
   },
   navbar: {
     position: 'fixed',
@@ -595,7 +675,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     height: '64px',
-    transition: 'left 0.3s ease',
+    transition: 'left 0.3s ease, width 0.3s ease',
   },
   navbarLeft: {
     display: 'flex',
@@ -645,6 +725,15 @@ const styles = {
     color: '#64748b',
     fontSize: '11px',
     fontWeight: '400',
+  },
+  contentWrapper: {
+    flex: 1,
+    overflowY: 'auto',
+    marginTop: '64px',
+    padding: '0',
+    minHeight: 'calc(100vh - 64px)',
+    maxHeight: 'calc(100vh - 64px)',
+    backgroundColor: '#f1f5f9',
   },
   content: {
     padding: '24px',

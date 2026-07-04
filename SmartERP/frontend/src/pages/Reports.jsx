@@ -137,43 +137,43 @@ export default function Reports() {
             title="Products" 
             value={report.total_products} 
             color="#2563eb" 
-            icon="📦" 
+           
           />
           <Card 
             title="Customers" 
             value={report.total_customers} 
             color="#16a34a" 
-            icon="👥" 
+            
           />
           <Card 
             title="Suppliers" 
             value={report.total_suppliers} 
             color="#9333ea" 
-            icon="🏭" 
+            
           />
           <Card 
             title="Purchase" 
             value={`₹ ${Number(report.total_purchase).toLocaleString("en-IN")}`} 
             color="#ea580c" 
-            icon="📥" 
+            
           />
           <Card 
             title="Sales" 
             value={`₹ ${Number(report.total_sale).toLocaleString("en-IN")}`} 
             color="#0891b2" 
-            icon="📤" 
+            
           />
           <Card 
             title="Available Stock" 
             value={report.total_stock} 
             color="#0284c7" 
-            icon="📊" 
+             
           />
           <Card
             title="Profit / Loss"
             value={`₹ ${Number(report.profit).toLocaleString("en-IN")}`}
             color={report.profit >= 0 ? "#059669" : "#dc2626"}
-            icon={report.profit >= 0 ? "📈" : "📉"}
+            
           />
         </div>
 
